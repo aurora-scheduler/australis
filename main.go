@@ -1,9 +1,9 @@
 package main
 
 import (
-  "github.com/rdelval/ionbeam/cmd"
+	"github.com/rdelval/australis/cmd"
 )
 
 func main() {
-  cmd.Execute()
+	cmd.Execute()
 }
