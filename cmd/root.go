@@ -20,19 +20,16 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-var username, password, zkurl string
+var username, password, zkAddr, schedAddr string
 var env, role, name string
 var client realis.Realis
 var monitor *realis.Monitor
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&zkurl, "zookeeper", "z", "", "Zookeeper node(s) where Aurora stores information.")
-	rootCmd.PersistentFlags().StringVarP(&username, "username", "u", "", "Username to use for API authentification")
-	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "Password to use for API authentification")
-
-	// TODO(rdelvalle): Add plain URL support. Enforce that url or zookeepr is set. Consider adding support for clusters.json.
-	// For now make ZK mandatory
-	rootCmd.MarkPersistentFlagRequired("zookeeper")
+	rootCmd.PersistentFlags().StringVarP(&zkAddr, "zookeeper", "z", "", "Zookeeper node(s) where Aurora stores information.")
+	rootCmd.PersistentFlags().StringVarP(&username, "username", "u", "", "Username to use for API authentication")
+	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "Password to use for API authentication")
+	rootCmd.PersistentFlags().StringVarP(&schedAddr, "scheduler_addr", "s", "", "Aurora Scheduler's address.")
 }
 
 func Execute() {
@@ -43,9 +40,7 @@ func connect(cmd *cobra.Command, args []string) {
 
 	var err error
 
-	// Connect to Aurora Scheduler and create a client object
-	client, err = realis.NewRealisClient(
-		realis.BasicAuth(username, password),
+	realisOptions := []realis.ClientOption{realis.BasicAuth(username, password),
 		realis.ThriftJSON(),
 		realis.TimeoutMS(20000),
 		realis.BackOff(&realis.Backoff{
@@ -53,8 +48,22 @@ func connect(cmd *cobra.Command, args []string) {
 			Duration: 10 * time.Second,
 			Factor:   2.0,
 			Jitter:   0.1,
-		}),
-		realis.ZKUrl(zkurl))
+		})}
+
+
+	// Prefer zookeeper if both ways of connecting are provided
+	if zkAddr != "" {
+		realisOptions = append(realisOptions, realis.ZKUrl(zkAddr))
+	} else if schedAddr != "" {
+		realisOptions = append(realisOptions, realis.SchedulerUrl(schedAddr))
+	} else {
+		fmt.Println("Zookeeper address or Scheduler URL must be provided.")
+		os.Exit(1)
+	}
+
+
+	// Connect to Aurora Scheduler and create a client object
+	client, err = realis.NewRealisClient(realisOptions...)
 
 	if err != nil {
 		fmt.Println(err)
