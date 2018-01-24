@@ -4,8 +4,8 @@
 [[projects]]
   name = "git.apache.org/thrift.git"
   packages = ["lib/go/thrift"]
-  revision = "327ebb6c2b6df8bf075da02ef45a2a034e9b79ba"
-  version = "0.11.0"
+  revision = "b2a4d4ae21c789b689dd162deb819665567f481c"
+  version = "0.10.0"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -38,8 +38,7 @@
 [[projects]]
   name = "github.com/spf13/cobra"
   packages = ["."]
-  revision = "7b2c5ac9fc04fc5efafb60700713d4fa609b777b"
-  version = "v0.0.1"
+  revision = "0c34d16c3123764e413b9ed982ada58b1c3d53ea"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -47,15 +46,9 @@
   revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
   version = "v1.0.0"
 
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/net"
-  packages = ["context"]
-  revision = "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "664dfc688b42344f836696146fd1bea8045851b4be6576db8be18d05ba1793f7"
+  inputs-digest = "e80e920e8ce403740797f4b5428c7e3380244d0b4cba4faa9e22cf1bee6beeea"
   solver-name = "gps-cdcl"
   solver-version = 1

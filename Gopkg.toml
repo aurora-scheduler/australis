@@ -19,6 +19,7 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
+required = ["git.apache.org/thrift.git/lib/go/thrift"]
 
 [[constraint]]
   name = "github.com/paypal/gorealis"
@@ -26,4 +27,8 @@
 
 [[constraint]]
   name = "github.com/spf13/cobra"
-  version = "0.0.1"
+  revision = "0c34d16c3123764e413b9ed982ada58b1c3d53ea"
+
+[[constraint]]
+  name = "git.apache.org/thrift.git"
+  version = "0.10.0"
