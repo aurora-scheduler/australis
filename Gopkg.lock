@@ -20,17 +20,15 @@
     "gen-go/apache/aurora",
     "response"
   ]
-  revision = "9631aa3aab9964631946814fa0d8b99a133c982f"
-  version = "v1.1.0"
+  revision = "dbb08ded90109302f32ae52821d7a28919406389"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
+  revision = "e881fd58d78e04cf6d0de1217f8707c8cc2249bc"
 
 [[projects]]
-  branch = "master"
   name = "github.com/samuel/go-zookeeper"
   packages = ["zk"]
   revision = "471cd4e61d7a78ece1791fa5faa0345dc8c7d5a5"
@@ -49,6 +47,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e80e920e8ce403740797f4b5428c7e3380244d0b4cba4faa9e22cf1bee6beeea"
+  inputs-digest = "2c5d0cedd3956478027941d8fd3f3a18b72a8ffd26f3fa3567a7dc7eaae16d50"
   solver-name = "gps-cdcl"
   solver-version = 1
