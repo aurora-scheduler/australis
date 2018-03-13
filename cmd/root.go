@@ -43,7 +43,7 @@ func connect(cmd *cobra.Command, args []string) {
 	realisOptions := []realis.ClientOption{realis.BasicAuth(username, password),
 		realis.ThriftJSON(),
 		realis.TimeoutMS(20000),
-		realis.BackOff(&realis.Backoff{
+		realis.BackOff(realis.Backoff{
 			Steps:    2,
 			Duration: 10 * time.Second,
 			Factor:   2.0,

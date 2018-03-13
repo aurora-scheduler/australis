@@ -20,8 +20,7 @@
     "gen-go/apache/aurora",
     "response"
   ]
-  revision = "dbb08ded90109302f32ae52821d7a28919406389"
-  version = "v1.2.0"
+  revision = "94e7c878b4e54385b6fbbb7b0c1ce5a82865af2b"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -47,6 +46,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2c5d0cedd3956478027941d8fd3f3a18b72a8ffd26f3fa3567a7dc7eaae16d50"
+  inputs-digest = "7cdf3e22d0409d2ae71180bc65c717e6b88f93c5dbf68c8fca796a6a8c32472c"
   solver-name = "gps-cdcl"
   solver-version = 1
