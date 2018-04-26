@@ -14,13 +14,14 @@
   version = "v1.0"
 
 [[projects]]
+  branch = "SSLOverride"
   name = "github.com/paypal/gorealis"
   packages = [
     ".",
     "gen-go/apache/aurora",
     "response"
   ]
-  revision = "94e7c878b4e54385b6fbbb7b0c1ce5a82865af2b"
+  revision = "d64a91784a16206c036048a5006a103ed7fe0d89"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -46,6 +47,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7cdf3e22d0409d2ae71180bc65c717e6b88f93c5dbf68c8fca796a6a8c32472c"
+  inputs-digest = "605455afaa36eb3474c79fbff14ae9755c5acf95d947da68ca1bc376c29f4245"
   solver-name = "gps-cdcl"
   solver-version = 1
