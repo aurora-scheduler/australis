@@ -36,6 +36,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&clientKey, "clientKey", "k", "", "Client key to use to connect to Aurora.")
 	rootCmd.PersistentFlags().StringVarP(&clientCert, "clientCert", "c", "", "Client certificate to use to connect to Aurora.")
 	rootCmd.PersistentFlags().StringVarP(&caCertsPath, "caCertsPath", "a", "", "CA certificates path to use.")
+	rootCmd.PersistentFlags().BoolVarP(&insecureSkipVerify, "insecureSkipVerify", "i", false, "Skip verification.")
 }
 
 func Execute() {
