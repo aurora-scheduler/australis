@@ -26,6 +26,16 @@ Flags:
 Use "australis [command] --help" for more information about a command.
 ```
 
+## Sample commands:
+
+### Fetching current leader
+`australis fetch leader [ZK NODE 1] [ZK NODE 2]...[ZK NODE N]`
+
+### Setting host to DRAIN:
+`australis start drain [HOST 1] [HOST 2]...[HOST N]`
+
+### Taking hosts out of DRAIN (End maintenance):
+`australis stop drain [HOST 1] [HOST 2]...[HOST N]`
 
 ## Status
 Australis is a work in progress and does not support all the features of Apache Aurora.
