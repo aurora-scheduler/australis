@@ -28,6 +28,8 @@ var insecureSkipVerify bool
 var caCertsPath string
 var clientKey, clientCert string
 
+var monitorInterval, monitorTimeout int
+
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&zkAddr, "zookeeper", "z", "", "Zookeeper node(s) where Aurora stores information.")
 	rootCmd.PersistentFlags().StringVarP(&username, "username", "u", "", "Username to use for API authentication")
