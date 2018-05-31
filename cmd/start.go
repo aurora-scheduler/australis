@@ -43,7 +43,7 @@ func drain(cmd *cobra.Command, args []string) {
 	// Monitor change to DRAINING and DRAINED mode
 	hostResult, err := monitor.HostMaintenance(
 		args,
-		[]aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED, aurora.MaintenanceMode_DRAINING},
+		[]aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED},
 		5,
 		10)
 	if err != nil {
