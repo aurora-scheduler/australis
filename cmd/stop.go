@@ -13,6 +13,8 @@ func init() {
 
 	// Stop subcommands
 	stopCmd.AddCommand(stopMaintCmd)
+	stopMaintCmd.Flags().IntVar(&monitorInterval,"interval", 5, "Interval at which to poll scheduler.")
+	stopMaintCmd.Flags().IntVar(&monitorTimeout,"timeout", 50, "Time after which the monitor will stop polling and throw an error.")
 }
 
 var stopCmd = &cobra.Command{
@@ -40,8 +42,8 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 	hostResult, err := monitor.HostMaintenance(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE},
-		5,
-		10)
+		monitorInterval,
+		monitorTimeout)
 	if err != nil {
 		for host, ok := range hostResult {
 			if !ok {
@@ -53,5 +55,5 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Print(result.String())
+	fmt.Println(result.String())
 }
