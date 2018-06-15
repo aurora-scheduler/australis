@@ -22,6 +22,10 @@ func init() {
 
 	// Fetch Leader
 	fetchCmd.AddCommand(leaderCmd)
+
+	// Fetch jobs
+	fetchCmd.AddCommand(fetchJobsCmd)
+	fetchJobsCmd.Flags().StringVarP(&role, "role", "r", "", "Aurora Role")
 }
 
 var fetchCmd = &cobra.Command{
@@ -43,6 +47,13 @@ var leaderCmd = &cobra.Command{
 	Short:             "Fetch current Aurora leader given Zookeeper nodes. Pass Zookeeper nodes separated by a space as an argument to this command.",
 	Long:              `To be written.`,
 	Run:               fetchLeader,
+}
+
+var fetchJobsCmd = &cobra.Command{
+	Use:   "jobs",
+	Short: "Fetch a list of task Aurora running under a role.",
+	Long:  `To be written.`,
+	Run:   fetchJobs,
 }
 
 func fetchTasks(cmd *cobra.Command, args []string) {
@@ -78,4 +89,31 @@ func fetchLeader(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Print(url)
+}
+
+// TODO: Expand this to be able to filter by job name and environment.
+func fetchJobs(cmd *cobra.Command, args []string)  {
+	fmt.Printf("Fetching tasks under role: %s \n", role)
+
+	if role == "" {
+		fmt.Println("Role must be specified.")
+		os.Exit(1)
+	}
+
+	if role == "*" {
+		fmt.Println("Warning: This is an expensive operation.")
+		role = ""
+	}
+
+	_, result, err := client.GetJobs(role)
+
+	if err != nil {
+		fmt.Print("error: %+v\n", err.Error())
+		os.Exit(1)
+	}
+
+	for jobConfig, _ := range result.GetConfigs() {
+		fmt.Println(jobConfig)
+	}
+
 }
