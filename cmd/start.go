@@ -72,7 +72,7 @@ var startSnapshotCmd = &cobra.Command{
 	Use:   "snapshot",
 	Short: "Force the leading scheduler to perform a Snapshot.",
 	Long: `Takes a Snapshot of the in memory state of the Apache Aurora cluster and
-    writes it to the Mesos replicated log. This should NOT be confused with a backup.`,
+writes it to the Mesos replicated log. This should NOT be confused with a backup.`,
 	Run:  snapshot,
 }
 
@@ -92,7 +92,7 @@ var startBackupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Force the leading scheduler to perform a Backup.",
 	Long: `Force the Aurora Scheduler to write a backup of the latest snapshot to the filesystem 
-    of the leading scheduler.`,
+of the leading scheduler.`,
 	Run:  backup,
 }
 
