@@ -16,16 +16,16 @@ func init() {
 
 	// Fetch Task Config
 	fetchCmd.AddCommand(taskConfigCmd)
-	taskConfigCmd.Flags().StringVarP(&env, "environment", "e", "", "Aurora Environment")
-	taskConfigCmd.Flags().StringVarP(&role, "role", "r", "", "Aurora Role")
-	taskConfigCmd.Flags().StringVarP(&name, "name", "n", "", "Aurora Name")
+	taskConfigCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
+	taskConfigCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
+	taskConfigCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
 
 	// Fetch Leader
 	fetchCmd.AddCommand(leaderCmd)
 
 	// Fetch jobs
 	fetchCmd.AddCommand(fetchJobsCmd)
-	fetchJobsCmd.Flags().StringVarP(&role, "role", "r", "", "Aurora Role")
+	fetchJobsCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 }
 
 var fetchCmd = &cobra.Command{
@@ -59,6 +59,17 @@ var fetchJobsCmd = &cobra.Command{
 func fetchTasks(cmd *cobra.Command, args []string) {
 	fmt.Printf("Fetching job configuration for [%s/%s/%s] \n", env, role, name)
 
+	// Task Query takes nil for values it shouldn't need to match against.
+	// This allows us to potentially more expensive calls for specific environments, roles, or job names.
+	if *env == "" {
+		env = nil
+	}
+	if *role == "" {
+		role = nil
+	}
+	if *role == "" {
+		role = nil
+	}
 	//TODO: Add filtering down by status
 	taskQuery := &aurora.TaskQuery{Environment: env, Role: role, JobName: name}
 
@@ -93,22 +104,22 @@ func fetchLeader(cmd *cobra.Command, args []string) {
 
 // TODO: Expand this to be able to filter by job name and environment.
 func fetchJobs(cmd *cobra.Command, args []string)  {
-	fmt.Printf("Fetching tasks under role: %s \n", role)
+	fmt.Printf("Fetching tasks under role: %s \n", *role)
 
-	if role == "" {
+	if *role == "" {
 		fmt.Println("Role must be specified.")
 		os.Exit(1)
 	}
 
-	if role == "*" {
+	if *role == "*" {
 		fmt.Println("Warning: This is an expensive operation.")
-		role = ""
+		*role = ""
 	}
 
-	_, result, err := client.GetJobs(role)
+	_, result, err := client.GetJobs(*role)
 
 	if err != nil {
-		fmt.Print("error: %+v\n", err.Error())
+		fmt.Printf("error: %+v\n", err.Error())
 		os.Exit(1)
 	}
 

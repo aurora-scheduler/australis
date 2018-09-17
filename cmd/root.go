@@ -21,7 +21,7 @@ var rootCmd = &cobra.Command{
 }
 
 var username, password, zkAddr, schedAddr string
-var env, role, name string
+var env, role, name *string
 var client realis.Realis
 var monitor *realis.Monitor
 var insecureSkipVerify bool
@@ -66,8 +66,6 @@ func connect(cmd *cobra.Command, args []string) {
 		zkOptions := []realis.ZKOpt{ realis.ZKEndpoints(zkAddr), realis.ZKPath("/aurora/scheduler")}
 
 		if clientKey != "" || clientCert != "" || caCertsPath != "" {
-			zkOptions = append(zkOptions, realis.ZKAuroraPortOverride(8081), realis.ZKAuroraSchemeOverride("https"))
-
 			realisOptions = append(realisOptions, realis.Certspath(caCertsPath), realis.ClientCerts(clientKey, clientCert))
 		}
 

@@ -15,6 +15,14 @@ func init() {
 	stopCmd.AddCommand(stopMaintCmd)
 	stopMaintCmd.Flags().IntVar(&monitorInterval,"interval", 5, "Interval at which to poll scheduler.")
 	stopMaintCmd.Flags().IntVar(&monitorTimeout,"timeout", 50, "Time after which the monitor will stop polling and throw an error.")
+
+	// Stop update
+
+	stopCmd.AddCommand(stopUpdateCmd)
+	stopUpdateCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
+	stopUpdateCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
+	stopUpdateCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
+
 }
 
 var stopCmd = &cobra.Command{
@@ -27,6 +35,13 @@ var stopMaintCmd = &cobra.Command{
 	Short: "Stop maintenance on a host (move to NONE).",
 	Long:  `Transition a list of hosts currently in a maintenance status out of it.`,
 	Run:   endMaintenance,
+}
+
+var stopUpdateCmd = &cobra.Command{
+	Use:   "update [update ID]",
+	Short: "Stop update",
+	Long:  `To be written.`,
+	Run:   stopUpdate,
 }
 
 func endMaintenance(cmd *cobra.Command, args []string) {
@@ -56,4 +71,27 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println(result.String())
+}
+
+func stopUpdate(cmd *cobra.Command, args []string) {
+
+	if len(args) != 1 {
+		fmt.Println("Only a single update ID must be provided.")
+		os.Exit(1)
+	}
+
+	fmt.Printf("Stopping (aborting) update [%s/%s/%s] %s\n", *env, *role, *name, args[0])
+
+	resp, err := client.AbortJobUpdate(aurora.JobUpdateKey{
+		Job: &aurora.JobKey{Environment: *env, Role: *role, Name: *name},
+		ID:  args[0],
+	},
+		"")
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(resp.String())
+
 }

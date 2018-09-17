@@ -5,34 +5,59 @@ import (
 	"log"
 	"os"
 
-	realis "github.com/paypal/gorealis"
+	"github.com/paypal/gorealis"
 	"github.com/paypal/gorealis/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	rootCmd.AddCommand(killCmd)
-	killCmd.Flags().StringVarP(&env, "environment", "e", "", "Aurora Environment")
-	killCmd.Flags().StringVarP(&role, "role", "r", "", "Aurora Role")
-	killCmd.Flags().StringVarP(&name, "name", "n", "", "Aurora Name")
-	killCmd.MarkFlagRequired("environment")
-	killCmd.MarkFlagRequired("role")
-	killCmd.MarkFlagRequired("name")
+
+
+	/* Sub-Commands */
+
+
+	// Kill Job
+	killCmd.AddCommand(killJobCmd)
+
+	killJobCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
+	killJobCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
+	killJobCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
+	killJobCmd.MarkFlagRequired("environment")
+	killJobCmd.MarkFlagRequired("role")
+	killJobCmd.MarkFlagRequired("name")
+
+	// Kill every task in the Aurora cluster
+	killCmd.AddCommand(killEntireClusterCmd)
+
+
 }
 
 var killCmd = &cobra.Command{
 	Use:   "kill",
 	Short: "Kill an Aurora Job",
+}
+
+var killJobCmd = &cobra.Command{
+	Use:   "job",
+	Short: "Kill an Aurora Job",
 	Run:   killJob,
 }
 
+var killEntireClusterCmd = &cobra.Command{
+	Use:   "entire-cluster",
+	Short: "Kill every task in the cluster.",
+	Long:  `To be written.`,
+	Run:   killEntireCluster,
+}
+
 func killJob(cmd *cobra.Command, args []string) {
-	log.Printf("Killing job [Env:%s Role:%s Name:%s]\n", env, role, name)
+	log.Printf("Killing job [Env:%s Role:%s Name:%s]\n", *env, *role, *name)
 
 	job := realis.NewJob().
-		Environment(env).
-		Role(role).
-		Name(name)
+		Environment(*env).
+		Role(*role).
+		Name(*name)
 	resp, err := client.KillJob(job.JobKey())
 	if err != nil {
 		fmt.Println(err)
@@ -46,4 +71,9 @@ func killJob(cmd *cobra.Command, args []string) {
 		}
 	}
 	fmt.Println(resp.String())
+}
+
+func killEntireCluster(cmd *cobra.Command, args []string) {
+	log.Println("This command will kill every single task inside of a cluster.")
+	log.Println("Not implemented yet.")
 }
