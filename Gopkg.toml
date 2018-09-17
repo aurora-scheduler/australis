@@ -2,12 +2,13 @@ required = ["git.apache.org/thrift.git/lib/go/thrift"]
 
 [[constraint]]
   name = "github.com/paypal/gorealis"
-  branch = "develop"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/spf13/cobra"
   revision = "0c34d16c3123764e413b9ed982ada58b1c3d53ea"
 
 [[constraint]]
-  name = "git.apache.org/thrift.git"
-  version = "0.10.0"
+    name = "git.apache.org/thrift.git"
+    branch = "0.10.0-http-client-fix"
+    source = "github.com/rdelval/thrift"
