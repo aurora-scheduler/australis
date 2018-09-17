@@ -21,7 +21,7 @@ var rootCmd = &cobra.Command{
 }
 
 var username, password, zkAddr, schedAddr string
-var env, role, name *string
+var env, role, name = new(string), new(string), new(string)
 var client realis.Realis
 var monitor *realis.Monitor
 var insecureSkipVerify bool
