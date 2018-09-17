@@ -5,6 +5,8 @@ A light-weight client for [Apache Aurora](https://aurora.apache.org/) built usin
 ## Usage 
 
 ```
+A light-weight command line client for use with Apache Aurora built using gorealis.
+
 Usage:
   australis [command]
 
@@ -13,11 +15,15 @@ Available Commands:
   fetch       Fetch information from Aurora
   help        Help about any command
   kill        Kill an Aurora Job
-  start       Start a service or maintenance on a host (DRAIN).
+  start       Start a service, maintenance on a host (DRAIN), a snapshot, or a backup.
   stop        Stop a service or maintenance on a host (DRAIN).
 
 Flags:
+  -a, --caCertsPath string      CA certificates path to use.
+  -c, --clientCert string       Client certificate to use to connect to Aurora.
+  -k, --clientKey string        Client key to use to connect to Aurora.
   -h, --help                    help for australis
+  -i, --insecureSkipVerify      Skip verification.
   -p, --password string         Password to use for API authentication
   -s, --scheduler_addr string   Aurora Scheduler's address.
   -u, --username string         Username to use for API authentication
