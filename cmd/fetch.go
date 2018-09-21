@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-
 	"github.com/paypal/gorealis"
 	"github.com/paypal/gorealis/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
@@ -26,6 +25,9 @@ func init() {
 	// Fetch jobs
 	fetchCmd.AddCommand(fetchJobsCmd)
 	fetchJobsCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
+
+	// Fetch Status
+	fetchCmd.AddCommand(fetchStatusCmd)
 }
 
 var fetchCmd = &cobra.Command{
@@ -56,6 +58,13 @@ var fetchJobsCmd = &cobra.Command{
 	Run:   fetchJobs,
 }
 
+var fetchStatusCmd = &cobra.Command{
+	Use: "status",
+	Short: "Fetch the maintenance status of a node from Aurora",
+	Long: `This command will print the actual status of the mesos agent nodes in Aurora server`,
+	Run: fetchStatus,
+}
+
 func fetchTasks(cmd *cobra.Command, args []string) {
 	fmt.Printf("Fetching job configuration for [%s/%s/%s] \n", env, role, name)
 
@@ -81,6 +90,19 @@ func fetchTasks(cmd *cobra.Command, args []string) {
 
 	for _, t := range tasks {
 		fmt.Println(t)
+	}
+}
+
+func fetchStatus(cmd *cobra.Command, args []string) {
+	fmt.Printf("Fetching maintenance status for %v \n", args)
+	_, result, err := client.MaintenanceStatus(args...)
+	if err != nil {
+		fmt.Printf("error: %+v\n", err.Error())
+		os.Exit(1)
+	}
+
+	for k := range result.Statuses {
+		fmt.Printf("Result: %s:%s\n", k.Host, k.Mode)
 	}
 }
 

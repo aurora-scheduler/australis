@@ -37,6 +37,9 @@ Use "australis [command] --help" for more information about a command.
 ### Fetching current leader
 `australis fetch leader [ZK NODE 1] [ZK NODE 2]...[ZK NODE N]`
 
+### Fetching status/mode of a agent
+`australis fetch status [HOST 1] [HOST 2]...[HOST N]`
+
 ### Setting host to DRAIN:
 `australis start drain [HOST 1] [HOST 2]...[HOST N]`
 
