@@ -61,20 +61,22 @@ func connect(cmd *cobra.Command, args []string) {
 
 	// Prefer zookeeper if both ways of connecting are provided
 	if zkAddr != "" {
-
 		// Configure Zookeeper to connect
 		zkOptions := []realis.ZKOpt{ realis.ZKEndpoints(zkAddr), realis.ZKPath("/aurora/scheduler")}
-
-		if clientKey != "" || clientCert != "" || caCertsPath != "" {
-			realisOptions = append(realisOptions, realis.Certspath(caCertsPath), realis.ClientCerts(clientKey, clientCert))
-		}
-
 		realisOptions = append(realisOptions, realis.ZookeeperOptions(zkOptions...))
 	} else if schedAddr != "" {
 		realisOptions = append(realisOptions, realis.SchedulerUrl(schedAddr))
 	} else {
 		fmt.Println("Zookeeper address or Scheduler URL must be provided.")
 		os.Exit(1)
+	}
+
+	// Client certificate configuration if available
+	if clientKey != "" || clientCert != "" || caCertsPath != "" {
+		realisOptions = append(realisOptions,
+			realis.Certspath(caCertsPath),
+			realis.ClientCerts(clientKey, clientCert),
+			realis.InsecureSkipVerify(insecureSkipVerify))
 	}
 
 	// Connect to Aurora Scheduler and create a client object
