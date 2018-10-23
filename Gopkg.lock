@@ -20,7 +20,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4878d5e36693272155367415c26c3b634fe5488ab9f0c0f267fd3359ce2c2f11"
+  digest = "1:7399006765ca37c19dbfb00d5c3e72160984ba5996669a582a0bcbe2445119bf"
   name = "github.com/paypal/gorealis"
   packages = [
     ".",
@@ -28,7 +28,7 @@
     "response",
   ]
   pruneopts = ""
-  revision = "e85781e6d4f41ac9d5bd11642b6c960b2fa0c300"
+  revision = "2306d6180fc302124ffa23fb18783fc1fd794db9"
 
 [[projects]]
   digest = "1:df48fb76fb2a40edea0c9b3d960bc95e326660d82ff1114e1f88001f7a236b40"
@@ -45,19 +45,19 @@
   revision = "471cd4e61d7a78ece1791fa5faa0345dc8c7d5a5"
 
 [[projects]]
-  digest = "1:7747c74ea2256d41544c67b1e4e473b6be1122dd42f35541589f0ba8f3cfd981"
+  digest = "1:9ba49264cef4386aded205f9cb5b1f2d30f983d7dc37a21c780d9db3edfac9a7"
   name = "github.com/spf13/cobra"
   packages = ["."]
   pruneopts = ""
-  revision = "0c34d16c3123764e413b9ed982ada58b1c3d53ea"
+  revision = "fe5e611709b0c57fa4a89136deaa8e1d4004d053"
 
 [[projects]]
-  digest = "1:261bc565833ef4f02121450d74eb88d5ae4bd74bfe5d0e862cddb8550ec35000"
+  digest = "1:cbaf13cdbfef0e4734ed8a7504f57fe893d471d62a35b982bf6fb3f036449a66"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = ""
-  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
-  version = "v1.0.0"
+  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
+  version = "v1.0.3"
 
 [solve-meta]
   analyzer-name = "dep"

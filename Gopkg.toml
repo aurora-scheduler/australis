@@ -6,7 +6,7 @@ required = ["git.apache.org/thrift.git/lib/go/thrift"]
 
 [[constraint]]
   name = "github.com/spf13/cobra"
-  revision = "0c34d16c3123764e413b9ed982ada58b1c3d53ea"
+  revision = "fe5e611709b0c57fa4a89136deaa8e1d4004d053"
 
 [[constraint]]
     name = "git.apache.org/thrift.git"
