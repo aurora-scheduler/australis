@@ -9,17 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:              "australis",
-	Short:            "australis is a client for Apache Aurora",
-	Long:             `A light-weight command line client for use with Apache Aurora built using gorealis.`,
-	PersistentPreRun: connect,
-	PersistentPostRun: func(cmd *cobra.Command, args []string) {
-		// Make all children close the client by default upon terminating
-		client.Close()
-	},
-}
-
 var username, password, zkAddr, schedAddr string
 var env, role, name = new(string), new(string), new(string)
 var client realis.Realis
@@ -33,6 +22,8 @@ const australisVer = "v0.0.5"
 var monitorInterval, monitorTimeout int
 
 func init() {
+	rootCmd.SetVersionTemplate(`{{printf "%s\n" .Version}}`)
+
 	rootCmd.PersistentFlags().StringVarP(&zkAddr, "zookeeper", "z", "", "Zookeeper node(s) where Aurora stores information.")
 	rootCmd.PersistentFlags().StringVarP(&username, "username", "u", "", "Username to use for API authentication")
 	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "Password to use for API authentication")
@@ -41,22 +32,22 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&clientCert, "clientCert", "c", "", "Client certificate to use to connect to Aurora.")
 	rootCmd.PersistentFlags().StringVarP(&caCertsPath, "caCertsPath", "a", "", "CA certificates path to use.")
 	rootCmd.PersistentFlags().BoolVarP(&insecureSkipVerify, "insecureSkipVerify", "i", false, "Skip verification.")
+}
 
-
-	// Add version command
-	rootCmd.AddCommand(versionCmd)
+var rootCmd = &cobra.Command{
+	Use:              "australis",
+	Short:            "australis is a client for Apache Aurora",
+	Long:             `A light-weight command line client for use with Apache Aurora built using gorealis.`,
+	PersistentPreRun: connect,
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		// Make all children close the client by default upon terminating
+		client.Close()
+	},
+	Version: australisVer,
 }
 
 func Execute() {
 	rootCmd.Execute()
-}
-
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Get version",
-	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
-	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
-	Run:  func(cmd *cobra.Command, args []string){ fmt.Println(australisVer) },
 }
 
 func connect(cmd *cobra.Command, args []string) {
