@@ -28,6 +28,8 @@ var insecureSkipVerify bool
 var caCertsPath string
 var clientKey, clientCert string
 
+const australisVer = "v0.0.5"
+
 var monitorInterval, monitorTimeout int
 
 func init() {
@@ -39,10 +41,22 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&clientCert, "clientCert", "c", "", "Client certificate to use to connect to Aurora.")
 	rootCmd.PersistentFlags().StringVarP(&caCertsPath, "caCertsPath", "a", "", "CA certificates path to use.")
 	rootCmd.PersistentFlags().BoolVarP(&insecureSkipVerify, "insecureSkipVerify", "i", false, "Skip verification.")
+
+
+	// Add version command
+	rootCmd.AddCommand(versionCmd)
 }
 
 func Execute() {
 	rootCmd.Execute()
+}
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Get version",
+	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
+	Run:  func(cmd *cobra.Command, args []string){ fmt.Println(australisVer) },
 }
 
 func connect(cmd *cobra.Command, args []string) {

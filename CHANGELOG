@@ -3,3 +3,4 @@
 * Backup and snapshot commands have now been moved to under the force subcommand as these are expensive operations
 and the subcommand should reflect that.
 * Cobra library upgrade.
+* Added version command.
