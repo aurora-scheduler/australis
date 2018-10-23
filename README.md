@@ -46,5 +46,11 @@ Use "australis [command] --help" for more information about a command.
 ### Taking hosts out of DRAIN (End maintenance):
 `australis stop drain [HOST 1] [HOST 2]...[HOST N]`
 
+### Force a snapshot
+`australis force snapshot`
+
+### Force a backup
+`australis force backup`
+
 ## Status
 Australis is a work in progress and does not support all the features of Apache Aurora.

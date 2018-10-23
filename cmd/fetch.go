@@ -121,7 +121,7 @@ func fetchLeader(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	fmt.Print(url)
+	fmt.Println(url)
 }
 
 // TODO: Expand this to be able to filter by job name and environment.

@@ -14,8 +14,6 @@ func init() {
 
 	// Sub-commands
 	startCmd.AddCommand(startMaintCmd)
-	startCmd.AddCommand(startSnapshotCmd)
-    startCmd.AddCommand(startBackupCmd)
 
 	// Maintenance specific flags
 	startMaintCmd.Flags().IntVar(&monitorInterval,"interval", 5, "Interval at which to poll scheduler.")
@@ -68,42 +66,3 @@ func drain(cmd *cobra.Command, args []string) {
 	fmt.Println(result.String())
 }
 
-var startSnapshotCmd = &cobra.Command{
-	Use:   "snapshot",
-	Short: "Force the leading scheduler to perform a Snapshot.",
-	Long: `Takes a Snapshot of the in memory state of the Apache Aurora cluster and
-writes it to the Mesos replicated log. This should NOT be confused with a backup.`,
-	Run:  snapshot,
-}
-
-func snapshot(cmd *cobra.Command, args []string) {
-
-	fmt.Println("Forcing scheduler to write snapshot to Mesos replicated log")
-	err := client.Snapshot()
-	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
-	} else {
-		fmt.Println("Snapshot started successfully")
-	}
-}
-
-var startBackupCmd = &cobra.Command{
-	Use:   "backup",
-	Short: "Force the leading scheduler to perform a Backup.",
-	Long: `Force the Aurora Scheduler to write a backup of the latest snapshot to the filesystem 
-of the leading scheduler.`,
-	Run:  backup,
-}
-
-func backup(cmd *cobra.Command, args []string) {
-
-	fmt.Println("Forcing scheduler to write a Backup of latest Snapshot to file system")
-	err := client.PerformBackup()
-	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
-	} else {
-		fmt.Println("Backup started successfully")
-	}
-}
