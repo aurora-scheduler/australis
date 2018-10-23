@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/paypal/gorealis"
-	"github.com/paypal/gorealis/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
 )
 
@@ -64,12 +63,11 @@ func killJob(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if resp.ResponseCode == aurora.ResponseCode_OK {
-		if ok, err := monitor.Instances(job.JobKey(), 0, 5, 50); !ok || err != nil {
-			log.Println("Unable to kill all instances of job")
-			os.Exit(1)
-		}
-	}
+    if ok, err := monitor.Instances(job.JobKey(), 0, 5, 50); !ok || err != nil {
+        log.Println("Unable to kill all instances of job")
+        os.Exit(1)
+    }
+
 	fmt.Println(resp.String())
 }
 
