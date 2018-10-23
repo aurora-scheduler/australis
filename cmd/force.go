@@ -84,17 +84,13 @@ var forceExplicitReconCmd = &cobra.Command{
 and the master responds with the latest state for each task, if possible.
 `,
 	Run:  explicitRecon,
+	Args: cobra.MaximumNArgs(1),
 }
 
 func explicitRecon(cmd *cobra.Command, args []string) {
 	var batchSize *int32
 
 	fmt.Println("Forcing scheduler to perform an explicit reconciliation with Mesos")
-
-	if len(args) > 1 || len(args) < 0 {
-		fmt.Println("Only provide a batch size.")
-		os.Exit(1)
-	}
 
 	switch len(args) {
 	case 0:
@@ -122,7 +118,6 @@ func explicitRecon(cmd *cobra.Command, args []string) {
 	} else {
 		fmt.Println("Explicit reconciliation started successfully")
 	}
-
 }
 
 var forceImplicitReconCmd = &cobra.Command{
