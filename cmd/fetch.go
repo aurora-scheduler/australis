@@ -19,12 +19,34 @@ func init() {
 	taskConfigCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	taskConfigCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
 
-	// Fetch Leader
+	/* Fetch Leader */
+
+	leaderCmd.Flags().String("zkPath", "/aurora/scheduler", "Zookeeper node path where leader election happens")
+
+	// Override usage template to hide global flags
+	leaderCmd.SetUsageTemplate(`Usage:{{if .Runnable}}
+{{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+{{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+	{{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+	{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+	Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+	{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+	{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`)
 	fetchCmd.AddCommand(leaderCmd)
 
 	// Fetch jobs
-	fetchCmd.AddCommand(fetchJobsCmd)
 	fetchJobsCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
+	fetchCmd.AddCommand(fetchJobsCmd)
 
 	// Fetch Status
 	fetchCmd.AddCommand(fetchStatusCmd)
@@ -43,11 +65,12 @@ var taskConfigCmd = &cobra.Command{
 }
 
 var leaderCmd = &cobra.Command{
-	Use:               "leader",
+	Use:               "leader [zkNode0, zkNode1, ...zkNodeN]",
 	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
-	Short:             "Fetch current Aurora leader given Zookeeper nodes. Pass Zookeeper nodes separated by a space as an argument to this command.",
-	Long:              `To be written.`,
+	Short:             "Fetch current Aurora leader given Zookeeper nodes. ",
+	Long:              `Gets the current leading aurora scheduler instance using information from Zookeeper path.
+Pass Zookeeper nodes separated by a space as an argument to this command.`,
 	Run:               fetchLeader,
 }
 
@@ -114,7 +137,7 @@ func fetchLeader(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	url, err := realis.LeaderFromZKOpts(realis.ZKEndpoints(args...), realis.ZKPath("/aurora/scheduler"))
+	url, err := realis.LeaderFromZKOpts(realis.ZKEndpoints(args...), realis.ZKPath(cmd.Flag("zkPath").Value.String()))
 
 	if err != nil {
 		fmt.Printf("error: %+v\n", err.Error())
