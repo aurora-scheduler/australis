@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#DH_VERBOSE = 1
+
+%:
+	dh $@
+
+clean:
+	rm -rf $(CURDIR)/build
+
+override_dh_auto_build:
+	mkdir  $(CURDIR)/build
+	docker run --rm -v "$(CURDIR)":/go/src/github.com/rdelval/australis -w /go/src/github.com/rdelval/australis golang:1.11 go build -o build/australis

@@ -1,0 +1,10 @@
+australis (0.0.5) unstable; urgency=medium
+
+  * Backup and snapshot commands have now been moved to under the force subcommand as these are expensive operations
+  and the subcommand should reflect that.
+  * Cobra library upgrade.
+  * Added version command.
+  * Added ability to use  config config file. By default this file will be located in /etc/aurora/australis.yml
+  * Changed insecureSkipVerify to skipCertVerification
+
+ -- Renan DelValle <renanidelvalle@gmail.com>  Wed, 24 Oct 2018 18:27:19 -0700

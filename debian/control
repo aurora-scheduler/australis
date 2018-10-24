@@ -1,0 +1,10 @@
+Source: australis
+Priority: optional
+Maintainer: Renan DelValle <renanidelvalle@gmail.com>
+Section: utils
+Standards-Version: 4.2.1.3
+Homepage: https://github.com/rdelval/australis
+
+Package: australis
+Architecture: any
+Description: A gorealis based client for Apache Aurora

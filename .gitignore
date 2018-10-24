@@ -1,0 +1,6 @@
+debian/australis
+debian/australis.debhelper.log
+debian/debhelper-build-stamp
+debian/files
+debian/australis.substvars
+build/
