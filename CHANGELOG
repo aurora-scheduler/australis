@@ -4,3 +4,5 @@
 and the subcommand should reflect that.
 * Cobra library upgrade.
 * Added version command.
+* Added ability to use  config config file. By default this file will be located in /etc/aurora/australis.yml
+* Changed insecureSkipVerify to skipCertVerification.
