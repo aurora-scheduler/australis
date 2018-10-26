@@ -1,0 +1,13 @@
+---
+
+#username: "aurora"
+#password: "secret"
+#clientKey: "/path/to/client/key"
+#clientCert: "/path/to/client/cert"
+#caCertsPath: "/path/to/ca/certs"
+#skipCertVerification: true
+#scheduler: "http://DirecToScheduler"
+#zk:
+#- 192.168.3.1
+#- 192.168.3.2
+#- 192.168.3.3
