@@ -51,6 +51,7 @@ type Realis interface {
 	GetTaskStatus(query *aurora.TaskQuery) ([]*aurora.ScheduledTask, error)
 	GetTasksWithoutConfigs(query *aurora.TaskQuery) ([]*aurora.ScheduledTask, error)
 	GetJobs(role string) (*aurora.Response, *aurora.GetJobsResult_, error)
+	GetPendingReason(query *aurora.TaskQuery) (pendingReasons []*aurora.PendingReason, e error)
 	JobUpdateDetails(updateQuery aurora.JobUpdateQuery) (*aurora.Response, error)
 	KillJob(key *aurora.JobKey) (*aurora.Response, error)
 	KillInstances(key *aurora.JobKey, instances ...int32) (*aurora.Response, error)
@@ -72,6 +73,7 @@ type Realis interface {
 
 	// Admin functions
 	DrainHosts(hosts ...string) (*aurora.Response, *aurora.DrainHostsResult_, error)
+	StartMaintenance(hosts ...string) (*aurora.Response, *aurora.StartMaintenanceResult_, error)
 	EndMaintenance(hosts ...string) (*aurora.Response, *aurora.EndMaintenanceResult_, error)
 	MaintenanceStatus(hosts ...string) (*aurora.Response, *aurora.MaintenanceStatusResult_, error)
 	SetQuota(role string, cpu *float64, ram *int64, disk *int64) (*aurora.Response, error)
@@ -249,6 +251,10 @@ func newTBinTransport(url string, timeout int, config *RealisConfig) (thrift.TTr
 	return trans, err
 }
 
+// This client implementation of the realis interface uses a retry mechanism for all Thrift Calls.
+// It will retry all calls which result in a temporary failure as well as calls that fail due to an EOF
+// being returned by the http client. Most permanent failures are now being caught by the thriftCallWithRetries
+// function and not being retried but there may be corner cases not yet handled.
 func NewRealisClient(options ...ClientOption) (Realis, error) {
 	config := &RealisConfig{}
 
@@ -441,7 +447,7 @@ func newTJSONConfig(url string, timeoutms int, config *RealisConfig) (*RealisCon
 
 	httpTrans := (trans).(*thrift.THttpClient)
 	httpTrans.SetHeader("Content-Type", "application/x-thrift")
-	httpTrans.SetHeader("User-Agent", "GoRealis v"+VERSION)
+	httpTrans.SetHeader("User-Agent", "gorealis v"+VERSION)
 
 	return &RealisConfig{transport: trans, protoFactory: thrift.NewTJSONProtocolFactory()}, nil
 }
@@ -458,7 +464,7 @@ func newTBinaryConfig(url string, timeoutms int, config *RealisConfig) (*RealisC
 
 	httpTrans.SetHeader("Accept", "application/vnd.apache.thrift.binary")
 	httpTrans.SetHeader("Content-Type", "application/vnd.apache.thrift.binary")
-	httpTrans.SetHeader("User-Agent", "GoRealis v"+VERSION)
+	httpTrans.SetHeader("User-Agent", "gorealis v"+VERSION)
 
 	return &RealisConfig{transport: trans, protoFactory: thrift.NewTBinaryProtocolFactoryDefault()}, nil
 
@@ -473,6 +479,9 @@ func (r *realisClient) ReestablishConn() error {
 	// Close existing connection
 	r.logger.Println("Re-establishing Connection to Aurora")
 	r.Close()
+
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	// Recreate connection from scratch using original options
 	newRealis, err := NewRealisClient(r.config.options...)
@@ -496,6 +505,10 @@ func (r *realisClient) ReestablishConn() error {
 
 // Releases resources associated with the realis client.
 func (r *realisClient) Close() {
+
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
 	r.client.Transport.Close()
 	r.readonlyClient.Transport.Close()
 	r.adminClient.Transport.Close()
@@ -553,12 +566,12 @@ func (r *realisClient) GetJobs(role string) (*aurora.Response, *aurora.GetJobsRe
 		return r.readonlyClient.GetJobs(role)
 	})
 
-	if resp.GetResult_() != nil {
-		result = resp.GetResult_().GetJobsResult_
-	}
-
 	if retryErr != nil {
 		return nil, result, errors.Wrap(retryErr, "Error getting Jobs from Aurora Scheduler")
+	}
+
+	if resp.GetResult_() != nil {
+		result = resp.GetResult_().GetJobsResult_
 	}
 
 	return resp, result, nil
@@ -633,7 +646,7 @@ func (r *realisClient) CreateService(auroraJob Job, settings *aurora.JobUpdateSe
 		return resp, nil, errors.Wrap(err, "unable to create service")
 	}
 
-	if resp != nil && resp.GetResult_() != nil {
+	if resp.GetResult_() != nil {
 		return resp, resp.GetResult_().GetStartJobUpdateResult_(), nil
 	}
 
@@ -862,6 +875,30 @@ func (r *realisClient) GetTaskStatus(query *aurora.TaskQuery) (tasks []*aurora.S
 	return response.ScheduleStatusResult(resp).GetTasks(), nil
 }
 
+// Get pending reason
+func (r *realisClient) GetPendingReason(query *aurora.TaskQuery) (pendingReasons []*aurora.PendingReason, e error) {
+
+	r.logger.DebugPrintf("GetPendingReason Thrift Payload: %+v\n", query)
+
+	resp, retryErr := r.thriftCallWithRetries(func() (*aurora.Response, error) {
+		return r.client.GetPendingReason(query)
+	})
+
+	if retryErr != nil {
+		return nil, errors.Wrap(retryErr, "Error querying Aurora Scheduler for pending Reasons")
+	}
+
+	var result map[*aurora.PendingReason]bool
+
+	if resp.GetResult_() != nil {
+		result = resp.GetResult_().GetGetPendingReasonResult_().GetReasons()
+	}
+	for reason := range result {
+		pendingReasons = append(pendingReasons, reason)
+	}
+	return pendingReasons, nil
+}
+
 // Get information about task including without a task configuration object
 func (r *realisClient) GetTasksWithoutConfigs(query *aurora.TaskQuery) (tasks []*aurora.ScheduledTask, e error) {
 
@@ -973,12 +1010,43 @@ func (r *realisClient) DrainHosts(hosts ...string) (*aurora.Response, *aurora.Dr
 		return r.adminClient.DrainHosts(drainList)
 	})
 
-	if resp != nil && resp.GetResult_() != nil {
+	if retryErr != nil {
+		return resp, result, errors.Wrap(retryErr, "Unable to recover connection")
+	}
+
+	if resp.GetResult_() != nil {
 		result = resp.GetResult_().GetDrainHostsResult_()
 	}
 
+	return resp, result, nil
+}
+
+func (r *realisClient) StartMaintenance(hosts ...string) (*aurora.Response, *aurora.StartMaintenanceResult_, error) {
+
+	var result *aurora.StartMaintenanceResult_
+
+	if len(hosts) == 0 {
+		return nil, nil, errors.New("no hosts provided to start maintenance on")
+	}
+
+	hostList := aurora.NewHosts()
+	hostList.HostNames = make(map[string]bool)
+	for _, host := range hosts {
+		hostList.HostNames[host] = true
+	}
+
+	r.logger.DebugPrintf("StartMaintenance Thrift Payload: %v\n", hostList)
+
+	resp, retryErr := r.thriftCallWithRetries(func() (*aurora.Response, error) {
+		return r.adminClient.StartMaintenance(hostList)
+	})
+
 	if retryErr != nil {
 		return resp, result, errors.Wrap(retryErr, "Unable to recover connection")
+	}
+
+	if resp.GetResult_() != nil {
+		result = resp.GetResult_().GetStartMaintenanceResult_()
 	}
 
 	return resp, result, nil
@@ -1004,12 +1072,12 @@ func (r *realisClient) EndMaintenance(hosts ...string) (*aurora.Response, *auror
 		return r.adminClient.EndMaintenance(hostList)
 	})
 
-	if resp.GetResult_() != nil {
-		result = resp.GetResult_().GetEndMaintenanceResult_()
-	}
-
 	if retryErr != nil {
 		return resp, result, errors.Wrap(retryErr, "Unable to recover connection")
+	}
+
+	if resp.GetResult_() != nil {
+		result = resp.GetResult_().GetEndMaintenanceResult_()
 	}
 
 	return resp, result, nil
@@ -1037,12 +1105,12 @@ func (r *realisClient) MaintenanceStatus(hosts ...string) (*aurora.Response, *au
 		return r.adminClient.MaintenanceStatus(hostList)
 	})
 
-	if resp.GetResult_() != nil {
-		result = resp.GetResult_().GetMaintenanceStatusResult_()
-	}
-
 	if retryErr != nil {
 		return resp, result, errors.Wrap(retryErr, "Unable to recover connection")
+	}
+
+	if resp.GetResult_() != nil {
+		result = resp.GetResult_().GetMaintenanceStatusResult_()
 	}
 
 	return resp, result, nil
@@ -1063,13 +1131,12 @@ func (r *realisClient) SetQuota(role string, cpu *float64, ramMb *int64, diskMb 
 	quota.Resources[c] = true
 	quota.Resources[d] = true
 	resp, retryErr := r.thriftCallWithRetries(func() (*aurora.Response, error) {
-		resp, retryErr := r.adminClient.SetQuota(role, quota)
-
-		if retryErr != nil {
-			return nil, errors.Wrap(retryErr, "Unable to set role quota")
-		}
-		return resp, nil
+		return r.adminClient.SetQuota(role, quota)
 	})
+
+	if retryErr != nil {
+		return resp, errors.Wrap(retryErr, "Unable to set role quota")
+	}
 	return resp, retryErr
 
 }
@@ -1078,14 +1145,12 @@ func (r *realisClient) SetQuota(role string, cpu *float64, ramMb *int64, diskMb 
 func (r *realisClient) GetQuota(role string) (*aurora.Response, error) {
 
 	resp, retryErr := r.thriftCallWithRetries(func() (*aurora.Response, error) {
-		resp, retryErr := r.adminClient.GetQuota(role)
-
-		if retryErr != nil {
-			return nil, errors.Wrap(retryErr, "Unable to get role quota")
-		}
-		return resp, nil
+		return r.adminClient.GetQuota(role)
 	})
 
+	if retryErr != nil {
+		return resp, errors.Wrap(retryErr, "Unable to get role quota")
+	}
 	return resp, retryErr
 }
 

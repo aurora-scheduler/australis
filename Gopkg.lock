@@ -46,6 +46,14 @@
   version = "v1.0"
 
 [[projects]]
+  digest = "1:6a874e3ddfb9db2b42bd8c85b6875407c702fa868eed20634ff489bc896ccfd3"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = ""
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:961dc3b1d11f969370533390fdf203813162980c858e1dabe827b60940c909a5"
   name = "github.com/magiconair/properties"
   packages = ["."]
@@ -63,7 +71,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7399006765ca37c19dbfb00d5c3e72160984ba5996669a582a0bcbe2445119bf"
+  digest = "1:5ce5dc410ed1e2aafcdfc45c6f725d9683ad63564cdb5ec3e478adef3cb8f2e3"
   name = "github.com/paypal/gorealis"
   packages = [
     ".",
@@ -71,7 +79,7 @@
     "response",
   ]
   pruneopts = ""
-  revision = "2306d6180fc302124ffa23fb18783fc1fd794db9"
+  revision = "a09a18ea3bb20176b104570ce0f401fb2d4ae32c"
 
 [[projects]]
   digest = "1:894aef961c056b6d85d12bac890bf60c44e99b46292888bfa66caf529f804457"
@@ -94,6 +102,14 @@
   packages = ["zk"]
   pruneopts = ""
   revision = "471cd4e61d7a78ece1791fa5faa0345dc8c7d5a5"
+
+[[projects]]
+  digest = "1:9d57e200ef5ccc4217fe0a34287308bac652435e7c6513f6263e0493d2245c56"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = ""
+  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:d0431c2fd72e39ee43ea7742322abbc200c3e704c9102c5c3c2e2e667095b0ca"
@@ -146,9 +162,20 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:efb97ebbd73c3a7068579327f5d98a17c09f6d8caf1fa3212c506e8bb78126b5"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  pruneopts = ""
+  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
+
+[[projects]]
+  branch = "master"
   digest = "1:3d1785223d1b588249f131ddb1a88b1f80ee3eaa20934aba6562a44e633bbe7d"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "unix",
+    "windows",
+  ]
   pruneopts = ""
   revision = "44b849a8bc13eb42e95e6c6c5e360481b73ec710"
 
@@ -182,7 +209,9 @@
     "git.apache.org/thrift.git/lib/go/thrift",
     "github.com/paypal/gorealis",
     "github.com/paypal/gorealis/gen-go/apache/aurora",
+    "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
+    "github.com/spf13/pflag",
     "github.com/spf13/viper",
   ]
   solver-name = "gps-cdcl"
