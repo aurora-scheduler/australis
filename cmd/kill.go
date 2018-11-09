@@ -2,19 +2,17 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/paypal/gorealis"
 	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
 	rootCmd.AddCommand(killCmd)
 
-
 	/* Sub-Commands */
-
 
 	// Kill Job
 	killCmd.AddCommand(killJobCmd)
@@ -28,8 +26,6 @@ func init() {
 
 	// Kill every task in the Aurora cluster
 	killCmd.AddCommand(killEntireClusterCmd)
-
-
 }
 
 var killCmd = &cobra.Command{
@@ -51,7 +47,7 @@ var killEntireClusterCmd = &cobra.Command{
 }
 
 func killJob(cmd *cobra.Command, args []string) {
-	log.Printf("Killing job [Env:%s Role:%s Name:%s]\n", *env, *role, *name)
+	log.Infof("Killing job [Env:%s Role:%s Name:%s]\n", *env, *role, *name)
 
 	job := realis.NewJob().
 		Environment(*env).
@@ -59,16 +55,18 @@ func killJob(cmd *cobra.Command, args []string) {
 		Name(*name)
 	resp, err := client.KillJob(job.JobKey())
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
-    if ok, err := monitor.Instances(job.JobKey(), 0, 5, 50); !ok || err != nil {
-        log.Println("Unable to kill all instances of job")
-        os.Exit(1)
-    }
+	if ok, err := monitor.Instances(job.JobKey(), 0, 5, 50); !ok || err != nil {
+		log.Fatalln("Unable to kill all instances of job")
+	}
 
-	fmt.Println(resp.String())
+	if toJson {
+		fmt.Println(toJSON(resp.GetResult_()))
+	} else {
+		fmt.Println(resp.GetResult_())
+	}
 }
 
 func killEntireCluster(cmd *cobra.Command, args []string) {

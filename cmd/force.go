@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -38,10 +39,9 @@ func snapshot(cmd *cobra.Command, args []string) {
 	fmt.Println("Forcing scheduler to write snapshot to Mesos replicated log")
 	err := client.Snapshot()
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err)
 	} else {
-		fmt.Println("Snapshot started successfully")
+		log.Println("Snapshot started successfully")
 	}
 }
 
@@ -57,10 +57,9 @@ func backup(cmd *cobra.Command, args []string) {
 	fmt.Println("Forcing scheduler to write a Backup of latest Snapshot to file system")
 	err := client.PerformBackup()
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err)
 	} else {
-		fmt.Println("Backup started successfully")
+		log.Println("Backup started successfully")
 	}
 }
 
@@ -90,31 +89,29 @@ and the master responds with the latest state for each task, if possible.
 func explicitRecon(cmd *cobra.Command, args []string) {
 	var batchSize *int32
 
-	fmt.Println("Forcing scheduler to perform an explicit reconciliation with Mesos")
+	log.Println("Forcing scheduler to perform an explicit reconciliation with Mesos")
 
 	switch len(args) {
 	case 0:
-		fmt.Println("Using default batch size for explicit recon.")
+		log.Infoln("Using default batch size for explicit recon.")
 	case 1:
-		fmt.Printf("Using %v as batch size for explicit recon.\n", args[0])
+		log.Infof("Using %v as batch size for explicit recon.\n", args[0])
 
 	    // Get batch size from args and convert it to the right format
 		batchInt, err := strconv.Atoi(args[0])
         if err != nil {
-            fmt.Printf("error: %+v\n", err.Error())
-            os.Exit(1)
+            log.Fatalf("error: %+v\n", err)
         }
+
 		batchInt32 := int32(batchInt)
 		batchSize = &batchInt32
     default:
-        fmt.Println("Provide 0 arguments to use default batch size or one argument to use a custom batch size.")
-        os.Exit(1)
+        log.Fatalln("Provide 0 arguments to use default batch size or one argument to use a custom batch size.")
 	}
 
 	err := client.ForceExplicitTaskReconciliation(batchSize)
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err.Error())
 	} else {
 		fmt.Println("Explicit reconciliation started successfully")
 	}
@@ -129,11 +126,10 @@ var forceImplicitReconCmd = &cobra.Command{
 
 func implicitRecon(cmd *cobra.Command, args []string) {
 
-	fmt.Println("Forcing scheduler to perform an implicit reconciliation with Mesos")
+	log.Println("Forcing scheduler to perform an implicit reconciliation with Mesos")
 	err := client.PerformBackup()
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err)
 	} else {
 		fmt.Println("Implicit reconciliation started successfully")
 	}

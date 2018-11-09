@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -23,5 +23,5 @@ var createCmd = &cobra.Command{
 }
 
 func createJob(cmd *cobra.Command, args []string) {
-	fmt.Println("Not implemented yet.")
+	log.Println("Not implemented yet.")
 }

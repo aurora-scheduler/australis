@@ -1,14 +1,14 @@
 package cmd
 
 import (
-    "fmt"
-    "github.com/spf13/viper"
-    "os"
-    "strings"
-    "time"
+	"github.com/spf13/viper"
+	"strings"
+	"time"
 
-    "github.com/paypal/gorealis"
-    "github.com/spf13/cobra"
+	"github.com/paypal/gorealis"
+	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var username, password, zkAddr, schedAddr string
@@ -19,13 +19,14 @@ var skipCertVerification bool
 var caCertsPath string
 var clientKey, clientCert string
 var configFile string
+var toJson bool
+var logLevel string
 
-const australisVer = "v0.0.5"
+const australisVer = "v0.0.6"
 
 var monitorInterval, monitorTimeout int
 
 func init() {
-
 
 	rootCmd.SetVersionTemplate(`{{printf "%s\n" .Version}}`)
 
@@ -38,7 +39,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&caCertsPath, "caCertsPath", "a", "", "Path where CA certificates can be found.")
 	rootCmd.PersistentFlags().BoolVarP(&skipCertVerification, "skipCertVerification", "i", false, "Skip CA certificate hostname verification.")
 	rootCmd.PersistentFlags().StringVar(&configFile, "config",  "/etc/aurora/australis.yml", "Config file to use.")
-
+	rootCmd.PersistentFlags().BoolVar(&toJson, "jsonOutput",  false, "Print output in JSON format.")
+	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l",  "info", "Set logging level [" + getLoggingLevels() + "].")
 }
 
 var rootCmd = &cobra.Command{
@@ -57,8 +59,22 @@ func Execute() {
 	rootCmd.Execute()
 }
 
+// TODO(rdelvalle): Move more from connect into this function
+func setConfig(cmd *cobra.Command, args []string) {
+	lvl, err := log.ParseLevel(logLevel)
+
+	if err != nil {
+		log.Fatalf("Log level %v is not valid\n", logLevel)
+	}
+
+	log.SetLevel(lvl)
+}
+
 func connect(cmd *cobra.Command, args []string) {
     var err error
+
+
+    setConfig(cmd, args)
 
     zkAddrSlice := strings.Split(zkAddr, ",")
 
@@ -113,8 +129,7 @@ func connect(cmd *cobra.Command, args []string) {
 	} else if schedAddr != "" {
 		realisOptions = append(realisOptions, realis.SchedulerUrl(schedAddr))
 	} else {
-		fmt.Println("Zookeeper address or Scheduler URL must be provided.")
-		os.Exit(1)
+		log.Fatalln("Zookeeper address or Scheduler URL must be provided.")
 	}
 
 	// Client certificate configuration if available
@@ -129,9 +144,7 @@ func connect(cmd *cobra.Command, args []string) {
 	client, err = realis.NewRealisClient(realisOptions...)
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	monitor = &realis.Monitor{Client: client}
-
 }

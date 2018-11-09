@@ -2,10 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"github.com/spf13/pflag"
+
 	"github.com/paypal/gorealis"
 	"github.com/paypal/gorealis/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -20,29 +23,23 @@ func init() {
 	taskConfigCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
 
 	/* Fetch Leader */
-
 	leaderCmd.Flags().String("zkPath", "/aurora/scheduler", "Zookeeper node path where leader election happens")
 
-	// Override usage template to hide global flags
-	leaderCmd.SetUsageTemplate(`Usage:{{if .Runnable}}
-{{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
-{{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
-
-Aliases:
-	{{.NameAndAliases}}{{end}}{{if .HasExample}}
-
-Examples:
-	{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
-
-	Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
-	{{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
-
-Flags:
-	{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
-
-Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
-`)
 	fetchCmd.AddCommand(leaderCmd)
+
+	// Hijack help function to hide unnecessary global flags
+	help := leaderCmd.HelpFunc()
+	leaderCmd.SetHelpFunc(func(cmd *cobra.Command, s []string){
+		if cmd.HasInheritedFlags(){
+
+			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag){
+				if f.Name != "logLevel" {
+					f.Hidden = true
+				}
+			})
+		}
+		help(cmd, s)
+	})
 
 	// Fetch jobs
 	fetchJobsCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
@@ -66,12 +63,16 @@ var taskConfigCmd = &cobra.Command{
 
 var leaderCmd = &cobra.Command{
 	Use:               "leader [zkNode0, zkNode1, ...zkNodeN]",
-	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
+	PersistentPreRun:  func(cmd *cobra.Command, args []string) {
+
+	}, //We don't need a realis client for this cmd
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
+	PreRun:            setConfig,
+	Args: cobra.MinimumNArgs(1),
 	Short:             "Fetch current Aurora leader given Zookeeper nodes. ",
-	Long:              `Gets the current leading aurora scheduler instance using information from Zookeeper path.
+	Long: `Gets the current leading aurora scheduler instance using information from Zookeeper path.
 Pass Zookeeper nodes separated by a space as an argument to this command.`,
-	Run:               fetchLeader,
+	Run: fetchLeader,
 }
 
 var fetchJobsCmd = &cobra.Command{
@@ -82,10 +83,10 @@ var fetchJobsCmd = &cobra.Command{
 }
 
 var fetchStatusCmd = &cobra.Command{
-	Use: "status",
+	Use:   "status",
 	Short: "Fetch the maintenance status of a node from Aurora",
-	Long: `This command will print the actual status of the mesos agent nodes in Aurora server`,
-	Run: fetchStatus,
+	Long:  `This command will print the actual status of the mesos agent nodes in Aurora server`,
+	Run:   fetchStatus,
 }
 
 func fetchTasks(cmd *cobra.Command, args []string) {
@@ -107,69 +108,74 @@ func fetchTasks(cmd *cobra.Command, args []string) {
 
 	tasks, err := client.GetTasksWithoutConfigs(taskQuery)
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err)
 	}
 
-	for _, t := range tasks {
-		fmt.Println(t)
+	if toJson {
+		fmt.Println(toJSON(tasks))
+	} else {
+		for _, t := range tasks {
+			fmt.Println(t)
+		}
 	}
 }
 
 func fetchStatus(cmd *cobra.Command, args []string) {
-	fmt.Printf("Fetching maintenance status for %v \n", args)
+	log.Infof("Fetching maintenance status for %v \n", args)
 	_, result, err := client.MaintenanceStatus(args...)
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err)
 	}
 
-	for k := range result.Statuses {
-		fmt.Printf("Result: %s:%s\n", k.Host, k.Mode)
+	if toJson {
+		fmt.Println(toJSON(result.Statuses))
+	} else {
+		for k := range result.Statuses {
+			fmt.Printf("Result: %s:%s\n", k.Host, k.Mode)
+		}
 	}
 }
 
 func fetchLeader(cmd *cobra.Command, args []string) {
-	fmt.Printf("Fetching leader from %v \n", args)
+	log.Infof("Fetching leader from %v \n", args)
 
 	if len(args) < 1 {
-		fmt.Println("At least one Zookeper node address must be passed in.")
-		os.Exit(1)
+		log.Fatalln("At least one Zookeeper node address must be passed in.")
 	}
 
 	url, err := realis.LeaderFromZKOpts(realis.ZKEndpoints(args...), realis.ZKPath(cmd.Flag("zkPath").Value.String()))
 
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err)
 	}
 
 	fmt.Println(url)
 }
 
 // TODO: Expand this to be able to filter by job name and environment.
-func fetchJobs(cmd *cobra.Command, args []string)  {
-	fmt.Printf("Fetching tasks under role: %s \n", *role)
+func fetchJobs(cmd *cobra.Command, args []string) {
+	log.Infof("Fetching tasks under role: %s \n", *role)
 
 	if *role == "" {
-		fmt.Println("Role must be specified.")
-		os.Exit(1)
+		log.Fatalln("Role must be specified.")
 	}
 
 	if *role == "*" {
-		fmt.Println("Warning: This is an expensive operation.")
+		log.Warnln("This is an expensive operation.")
 		*role = ""
 	}
 
 	_, result, err := client.GetJobs(*role)
 
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err)
 	}
 
-	for jobConfig, _ := range result.GetConfigs() {
-		fmt.Println(jobConfig)
+	if toJson {
+		fmt.Println(toJSON(result.GetConfigs()))
+	} else {
+		for jobConfig := range result.GetConfigs() {
+			fmt.Println(jobConfig)
+		}
 	}
-
 }

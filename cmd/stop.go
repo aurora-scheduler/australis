@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/paypal/gorealis/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -45,13 +45,14 @@ var stopUpdateCmd = &cobra.Command{
 }
 
 func endMaintenance(cmd *cobra.Command, args []string) {
-	fmt.Println("Setting hosts to NONE maintenance status.")
-	fmt.Println(args)
+	log.Println("Setting hosts to NONE maintenance status.")
+	log.Println(args)
 	_, result, err := client.EndMaintenance(args...)
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err)
 	}
+
+	log.Debugln(result)
 
 	// Monitor change to NONE mode
 	hostResult, err := monitor.HostMaintenance(
@@ -59,28 +60,41 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE},
 		monitorInterval,
 		monitorTimeout)
+
+	transitioned := make([]string, 0,0)
 	if err != nil {
+		nonTransitioned := make([]string, 0,0)
+
 		for host, ok := range hostResult {
-			if !ok {
-				fmt.Printf("Host %s did not transtion into desired mode(s)\n", host)
+			if ok {
+				transitioned = append(transitioned, host)
+			} else {
+				nonTransitioned = append(nonTransitioned, host)
 			}
 		}
 
-		fmt.Printf("error: %+v\n", err.Error())
-		return
+		log.Printf("error: %+v\n", err)
+		if toJson {
+			fmt.Println(toJSON(nonTransitioned))
+		} else {
+			fmt.Println("Did not enter NONE status: ", nonTransitioned)
+		}
 	}
 
-	fmt.Println(result.String())
+	if toJson {
+		fmt.Println(toJSON(transitioned))
+	} else {
+		fmt.Println("Entered NONE status: ", transitioned)
+	}
 }
 
 func stopUpdate(cmd *cobra.Command, args []string) {
 
 	if len(args) != 1 {
-		fmt.Println("Only a single update ID must be provided.")
-		os.Exit(1)
+		log.Fatalln("Only a single update ID must be provided.")
 	}
 
-	fmt.Printf("Stopping (aborting) update [%s/%s/%s] %s\n", *env, *role, *name, args[0])
+	log.Infof("Stopping (aborting) update [%s/%s/%s] %s\n", *env, *role, *name, args[0])
 
 	resp, err := client.AbortJobUpdate(aurora.JobUpdateKey{
 		Job: &aurora.JobKey{Environment: *env, Role: *role, Name: *name},
@@ -89,9 +103,12 @@ func stopUpdate(cmd *cobra.Command, args []string) {
 		"")
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
-	fmt.Println(resp.String())
 
+	if toJson{
+		fmt.Println(toJSON(resp.GetResult_()))
+	} else {
+		fmt.Println(resp.GetDetails())
+	}
 }

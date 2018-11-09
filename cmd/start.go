@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/paypal/gorealis/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -38,13 +38,14 @@ expects a space separated list of hosts to place into maintenance mode.`,
 }
 
 func drain(cmd *cobra.Command, args []string) {
-	fmt.Println("Setting hosts to DRAINING")
-	fmt.Println(args)
+	log.Infoln("Setting hosts to DRAINING")
+	log.Infoln(args)
 	_, result, err := client.DrainHosts(args...)
 	if err != nil {
-		fmt.Printf("error: %+v\n", err.Error())
-		os.Exit(1)
+		log.Fatalf("error: %+v\n", err)
 	}
+
+	log.Debugln(result)
 
 	// Monitor change to DRAINING and DRAINED mode
 	hostResult, err := monitor.HostMaintenance(
@@ -52,17 +53,31 @@ func drain(cmd *cobra.Command, args []string) {
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED},
 		monitorInterval,
 		monitorTimeout)
+
+	transitioned := make([]string, 0,0)
 	if err != nil {
+		nonTransitioned := make([]string, 0,0)
+
 		for host, ok := range hostResult {
-			if !ok {
-				fmt.Printf("Host %s did not transtion into desired mode(s)\n", host)
+			if ok {
+				transitioned = append(transitioned, host)
+			} else {
+				nonTransitioned = append(nonTransitioned, host)
 			}
 		}
 
-		fmt.Printf("error: %+v\n", err.Error())
-		return
+		log.Printf("error: %+v\n", err)
+		if toJson {
+			fmt.Println(toJSON(nonTransitioned))
+		} else {
+			fmt.Println("Did not enter DRAINED status: ", nonTransitioned)
+		}
 	}
 
-	fmt.Println(result.String())
+    if toJson {
+        fmt.Println(toJSON(transitioned))
+    } else {
+		fmt.Println("Entered DRAINED status: ", transitioned)
+    }
 }
 
