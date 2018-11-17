@@ -61,30 +61,11 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 		monitorInterval,
 		monitorTimeout)
 
-	transitioned := make([]string, 0,0)
+
+	maintenanceMonitorPrint(hostResult,[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE})
+
 	if err != nil {
-		nonTransitioned := make([]string, 0,0)
-
-		for host, ok := range hostResult {
-			if ok {
-				transitioned = append(transitioned, host)
-			} else {
-				nonTransitioned = append(nonTransitioned, host)
-			}
-		}
-
-		log.Printf("error: %+v\n", err)
-		if toJson {
-			fmt.Println(toJSON(nonTransitioned))
-		} else {
-			fmt.Println("Did not enter NONE status: ", nonTransitioned)
-		}
-	}
-
-	if toJson {
-		fmt.Println(toJSON(transitioned))
-	} else {
-		fmt.Println("Entered NONE status: ", transitioned)
+		log.Fatalln("error: %+v", err)
 	}
 }
 

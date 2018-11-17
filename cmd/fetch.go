@@ -31,7 +31,6 @@ func init() {
 	help := leaderCmd.HelpFunc()
 	leaderCmd.SetHelpFunc(func(cmd *cobra.Command, s []string){
 		if cmd.HasInheritedFlags(){
-
 			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag){
 				if f.Name != "logLevel" {
 					f.Hidden = true
@@ -63,9 +62,7 @@ var taskConfigCmd = &cobra.Command{
 
 var leaderCmd = &cobra.Command{
 	Use:               "leader [zkNode0, zkNode1, ...zkNodeN]",
-	PersistentPreRun:  func(cmd *cobra.Command, args []string) {
-
-	}, //We don't need a realis client for this cmd
+	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
 	PreRun:            setConfig,
 	Args: cobra.MinimumNArgs(1),
@@ -172,7 +169,13 @@ func fetchJobs(cmd *cobra.Command, args []string) {
 	}
 
 	if toJson {
-		fmt.Println(toJSON(result.GetConfigs()))
+		var configSlice []*aurora.JobConfiguration
+
+		for config := range result.GetConfigs() {
+			configSlice = append(configSlice, config)
+		}
+
+		fmt.Println(toJSON(configSlice))
 	} else {
 		for jobConfig := range result.GetConfigs() {
 			fmt.Println(jobConfig)

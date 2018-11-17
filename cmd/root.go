@@ -39,7 +39,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&caCertsPath, "caCertsPath", "a", "", "Path where CA certificates can be found.")
 	rootCmd.PersistentFlags().BoolVarP(&skipCertVerification, "skipCertVerification", "i", false, "Skip CA certificate hostname verification.")
 	rootCmd.PersistentFlags().StringVar(&configFile, "config",  "/etc/aurora/australis.yml", "Config file to use.")
-	rootCmd.PersistentFlags().BoolVar(&toJson, "jsonOutput",  false, "Print output in JSON format.")
+	rootCmd.PersistentFlags().BoolVar(&toJson, "toJSON",  false, "Print output in JSON format.")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l",  "info", "Set logging level [" + getLoggingLevels() + "].")
 }
 
