@@ -2,7 +2,8 @@ required = ["git.apache.org/thrift.git/lib/go/thrift"]
 
 [[constraint]]
   name = "github.com/paypal/gorealis"
-  branch = "master"
+  branch = "drainSLA"
+  source = "github.com/rdelval/gorealis"
 
 [[constraint]]
   name = "github.com/spf13/cobra"

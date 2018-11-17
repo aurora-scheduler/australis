@@ -70,8 +70,8 @@
   version = "v1.1.2"
 
 [[projects]]
-  branch = "master"
-  digest = "1:5ce5dc410ed1e2aafcdfc45c6f725d9683ad63564cdb5ec3e478adef3cb8f2e3"
+  branch = "drainSLA"
+  digest = "1:154e4eb61c4f730b3b5962fc254e7aff9ddb9bab50efd6ab098fcfcad0e1920f"
   name = "github.com/paypal/gorealis"
   packages = [
     ".",
@@ -79,7 +79,8 @@
     "response",
   ]
   pruneopts = ""
-  revision = "a09a18ea3bb20176b104570ce0f401fb2d4ae32c"
+  revision = "f27dc4a6abf5a2ad8675d7a4ba0059309631e473"
+  source = "github.com/rdelval/gorealis"
 
 [[projects]]
   digest = "1:894aef961c056b6d85d12bac890bf60c44e99b46292888bfa66caf529f804457"
