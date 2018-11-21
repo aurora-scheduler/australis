@@ -77,10 +77,10 @@ state for all currently known non-terminal tasks.
 }
 
 var forceExplicitReconCmd = &cobra.Command{
-	Use:   "explicit",
+	Use:   "explicit [batch_size]",
 	Short: "Force the leading scheduler to perform an explicit recon.",
-	Long: `Aurora will send a list of non-terminal task IDs
-and the master responds with the latest state for each task, if possible.
+	Long: `Aurora will send a list of non-terminal task IDs and the master
+responds with the latest state for each task, if possible.
 `,
 	Run:  explicitRecon,
 	Args: cobra.MaximumNArgs(1),
@@ -120,14 +120,15 @@ func explicitRecon(cmd *cobra.Command, args []string) {
 var forceImplicitReconCmd = &cobra.Command{
 	Use:   "implicit",
 	Short: "Force the leading scheduler to perform an implicit recon.",
-	Long: `Force the `,
+	Long: `Forces leading scheduler to ask Mesos Master for a list of the latest state for
+all currently known non-terminal tasks being run by Aurora.`,
 	Run:  implicitRecon,
 }
 
 func implicitRecon(cmd *cobra.Command, args []string) {
 
 	log.Println("Forcing scheduler to perform an implicit reconciliation with Mesos")
-	err := client.PerformBackup()
+	err := client.ForceImplicitTaskReconciliation()
 	if err != nil {
 		log.Fatalf("error: %+v\n", err)
 	} else {

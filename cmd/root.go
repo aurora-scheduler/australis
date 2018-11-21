@@ -21,10 +21,13 @@ var clientKey, clientCert string
 var configFile string
 var toJson bool
 var logLevel string
+var duration time.Duration
+var percent float64
+var count int64
 
-const australisVer = "v0.0.6"
+const australisVer = "v0.0.7"
 
-var monitorInterval, monitorTimeout int
+var monitorInterval, monitorTimeout time.Duration
 
 func init() {
 

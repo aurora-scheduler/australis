@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/paypal/gorealis/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -15,20 +16,34 @@ func init() {
 	startCmd.AddCommand(startDrainCmd)
 
 	// Maintenance specific flags
-	startDrainCmd.Flags().IntVar(&monitorInterval,"interval", 5, "Interval at which to poll scheduler.")
-	startDrainCmd.Flags().IntVar(&monitorTimeout,"timeout", 50, "Time after which the monitor will stop polling and throw an error.")
+	startDrainCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
+	startDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
 
 	startCmd.AddCommand(startSLADrainCmd)
 
+
+	/* SLA Aware commands */
+	startSLADrainCmd.AddCommand(startSLACountDrainCmd)
+
 	// SLA Maintenance specific flags
-	startSLADrainCmd.Flags().IntVar(&monitorInterval,"interval", 5, "Interval at which to poll scheduler.")
-	startSLADrainCmd.Flags().IntVar(&monitorTimeout,"timeout", 50, "Time after which the monitor will stop polling and throw an error.")
+	startSLACountDrainCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
+	startSLACountDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
+	startSLACountDrainCmd.Flags().Int64Var(&count, "count", 5, "Instances count that should be running to meet SLA.")
+	startSLACountDrainCmd.Flags().DurationVar(&duration, "duration", time.Minute * 10, "Window of time from which we derive the SLA.")
+
+	startSLADrainCmd.AddCommand(startSLAPercentageDrainCmd)
+
+	// SLA Maintenance specific flags
+	startSLAPercentageDrainCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
+	startSLAPercentageDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
+    startSLAPercentageDrainCmd.Flags().Float64Var(&percent, "percent", 75.0, "Percentage of instances that should be running to meet SLA.")
+	startSLAPercentageDrainCmd.Flags().DurationVar(&duration, "duration", time.Minute * 10, "Window of time from which we derive the SLA.")
 
 	startCmd.AddCommand(startMaintenanceCmd)
 
 	// SLA Maintenance specific flags
-	startMaintenanceCmd.Flags().IntVar(&monitorInterval,"interval", 5, "Interval at which to poll scheduler.")
-	startMaintenanceCmd.Flags().IntVar(&monitorTimeout,"timeout", 50, "Time after which the monitor will stop polling and throw an error.")
+	startMaintenanceCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
+	startMaintenanceCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
 }
 
 var startCmd = &cobra.Command{
@@ -48,14 +63,30 @@ expects a space separated list of hosts to place into maintenance mode.`,
 }
 
 var startSLADrainCmd = &cobra.Command{
-	Use:   "sla-drain [space separated host list]",
-	Short: "Place a list of space separated Mesos Agents into maintenance mode using SLA awareness.",
+	Use:   "sla-drain",
+	Short: "Place a list of space separated Mesos Agents into maintenance mode using SLA aware strategies.",
 	Long: `Adds a Mesos Agent to Aurora's Drain list. Agents in this list
 are not allowed to schedule new tasks and any tasks already running on this Agent
 are killed and rescheduled in an Agent that is not in maintenance mode. Command
 expects a space separated list of hosts to place into maintenance mode.`,
+}
+
+var startSLACountDrainCmd = &cobra.Command{
+	Use:   "count [space separated host list]",
+	Short: "Place a list of space separated Mesos Agents into maintenance mode using the count SLA aware policy as a fallback.",
+	Long: `Adds a Mesos Agent to Aurora's Drain list. Tasks will be drained using the count SLA policy as a fallback
+when a Job does not have a defined SLA policy.`,
 	Args: cobra.MinimumNArgs(1),
-	Run:  SLAdrain,
+	Run:  SLACountDrain,
+}
+
+var startSLAPercentageDrainCmd = &cobra.Command{
+	Use:   "percentage [space separated host list]",
+	Short: "Place a list of space separated Mesos Agents into maintenance mode using the percentage SLA aware policy as a fallback.",
+	Long: `Adds a Mesos Agent to Aurora's Drain list. Tasks will be drained using the percentage SLA policy as a fallback
+when a Job does not have a defined SLA policy.`,
+	Args: cobra.MinimumNArgs(1),
+	Run:  SLAPercentageDrain,
 }
 
 var startMaintenanceCmd = &cobra.Command{
@@ -82,9 +113,8 @@ func drain(cmd *cobra.Command, args []string) {
 	hostResult, err := monitor.HostMaintenance(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED},
-		monitorInterval,
-		monitorTimeout)
-
+		int(monitorInterval.Seconds()),
+		int(monitorTimeout.Seconds()))
 
 	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED})
 
@@ -93,12 +123,9 @@ func drain(cmd *cobra.Command, args []string) {
 	}
 }
 
-func SLAdrain(cmd *cobra.Command, args []string) {
-	log.Infoln("Setting hosts to DRAINING with SLA awareness")
-	log.Infoln(args)
+func slaDrain(policy *aurora.SlaPolicy, hosts ...string) {
 
-	policy := aurora.SlaPolicy{CountSlaPolicy: &aurora.CountSlaPolicy{Count: 1, DurationSecs: 60*30}}
-	result, err := client.SLADrainHosts(&policy, 60*60, args...)
+	result, err := client.SLADrainHosts(policy, 60*60, hosts...)
 	if err != nil {
 		log.Fatalf("error: %+v\n", err)
 	}
@@ -107,17 +134,34 @@ func SLAdrain(cmd *cobra.Command, args []string) {
 
 	// Monitor change to DRAINING and DRAINED mode
 	hostResult, err := monitor.HostMaintenance(
-		args,
+		hosts,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED},
-		monitorInterval,
-		monitorTimeout)
+		int(monitorInterval.Seconds()),
+		int(monitorTimeout.Seconds()))
 
 	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED})
 
 	if err != nil {
 		log.Fatalln("error: %+v", err)
 	}
+}
 
+func SLACountDrain(cmd *cobra.Command, args []string) {
+	log.Infoln("Setting hosts to DRAINING with the Count SLA policy.")
+	log.Infoln(args)
+
+	slaDrain(&aurora.SlaPolicy{
+		CountSlaPolicy: &aurora.CountSlaPolicy{Count: count, DurationSecs: int64(duration.Seconds())}},
+	args...)
+}
+
+func SLAPercentageDrain(cmd *cobra.Command, args []string) {
+	log.Infoln("Setting hosts to DRAINING with the Percentage SLA policy.")
+	log.Infoln(args)
+
+	slaDrain(&aurora.SlaPolicy{
+		PercentageSlaPolicy: &aurora.PercentageSlaPolicy{Percentage: percent, DurationSecs: int64(duration.Seconds())}},
+	args...)
 }
 
 func maintenance(cmd *cobra.Command, args []string) {
@@ -134,8 +178,8 @@ func maintenance(cmd *cobra.Command, args []string) {
 	hostResult, err := monitor.HostMaintenance(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED},
-		monitorInterval,
-		monitorTimeout)
+		int(monitorInterval.Seconds()),
+		int(monitorTimeout.Seconds()))
 
 
 	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED})

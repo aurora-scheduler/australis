@@ -65,8 +65,8 @@ func maintenanceMonitorPrint(hostResult map[string]bool, desiredStates []aurora.
 		if toJson {
 			fmt.Println(toJSON(output))
 		} else {
-			fmt.Printf("Entered %v status: %v", output.DesiredStates, output.Transitioned)
-			fmt.Printf("Did not enter %v status: %v", output.DesiredStates, output.NonTransitioned)
+			fmt.Printf("Entered %v status: %v\n", output.DesiredStates, output.Transitioned)
+			fmt.Printf("Did not enter %v status: %v\n", output.DesiredStates, output.NonTransitioned)
 		}
 	}
 }

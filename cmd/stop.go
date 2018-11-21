@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/paypal/gorealis/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -13,8 +14,8 @@ func init() {
 
 	// Stop subcommands
 	stopCmd.AddCommand(stopMaintCmd)
-	stopMaintCmd.Flags().IntVar(&monitorInterval,"interval", 5, "Interval at which to poll scheduler.")
-	stopMaintCmd.Flags().IntVar(&monitorTimeout,"timeout", 50, "Time after which the monitor will stop polling and throw an error.")
+	stopMaintCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
+	stopMaintCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
 
 	// Stop update
 
@@ -58,8 +59,8 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 	hostResult, err := monitor.HostMaintenance(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE},
-		monitorInterval,
-		monitorTimeout)
+		int(monitorInterval.Seconds()),
+		int(monitorTimeout.Seconds()))
 
 
 	maintenanceMonitorPrint(hostResult,[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE})
