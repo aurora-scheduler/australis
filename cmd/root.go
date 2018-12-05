@@ -13,6 +13,8 @@ import (
 
 var username, password, zkAddr, schedAddr string
 var env, role, name = new(string), new(string), new(string)
+var ram, disk int64
+var cpu float64
 var client realis.Realis
 var monitor *realis.Monitor
 var skipCertVerification bool
