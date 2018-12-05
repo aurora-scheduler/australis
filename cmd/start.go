@@ -17,7 +17,7 @@ func init() {
 
 	// Maintenance specific flags
 	startDrainCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
-	startDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
+	startDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 10, "Time after which the monitor will stop polling and throw an error.")
 
 	startCmd.AddCommand(startSLADrainCmd)
 
@@ -27,7 +27,7 @@ func init() {
 
 	// SLA Maintenance specific flags
 	startSLACountDrainCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
-	startSLACountDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
+	startSLACountDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 20, "Time after which the monitor will stop polling and throw an error.")
 	startSLACountDrainCmd.Flags().Int64Var(&count, "count", 5, "Instances count that should be running to meet SLA.")
 	startSLACountDrainCmd.Flags().DurationVar(&duration, "duration", time.Minute * 10, "Window of time from which we derive the SLA.")
 
