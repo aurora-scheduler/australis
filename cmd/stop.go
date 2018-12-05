@@ -91,6 +91,6 @@ func stopUpdate(cmd *cobra.Command, args []string) {
 	if toJson{
 		fmt.Println(toJSON(resp.GetResult_()))
 	} else {
-		fmt.Println(resp.GetDetails())
+		fmt.Println(resp.GetResult_())
 	}
 }
