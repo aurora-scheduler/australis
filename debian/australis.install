@@ -1,2 +1,5 @@
+#!/usr/bin/dh-exec
+
+build/australis.bash => usr/share/bash-completion/completions/australis
 build/australis usr/bin
 debian/etc/aurora/australis.yml etc/aurora

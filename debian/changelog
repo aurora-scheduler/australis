@@ -1,3 +1,11 @@
+australis (0.0.6) unstable; urgency=medium
+
+  * Added auto-completion to the deb file.
+  * Added set verb and quota noun to set quota resource for certain roles.
+  * Added JSON output as an option for all commands.
+
+ -- Renan DelValle <renanidelvalle@gmail.com>  Wed, 05 Dec 2018 15:10:00 -0700
+
 australis (0.0.5) unstable; urgency=medium
 
   * Backup and snapshot commands have now been moved to under the force subcommand as these are expensive operations

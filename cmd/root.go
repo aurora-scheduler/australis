@@ -26,8 +26,9 @@ var logLevel string
 var duration time.Duration
 var percent float64
 var count int64
+var filename string
 
-const australisVer = "v0.0.7"
+const australisVer = "v0.0.6"
 
 var monitorInterval, monitorTimeout time.Duration
 

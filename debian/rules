@@ -8,7 +8,13 @@
 
 clean:
 	rm -rf $(CURDIR)/build
+	rm -rf $(CURDIR)/debian/asutralis
+	rm -rf $(CURDIR)/debian/australis.debhelper.log
+	rm -rf $(CURDIR)/debian/debhelper-build-stamp
+	rm -rf $(CURDIR)/debian/files
+	rm -rf $(CURDIR)/debian/australis.substvars
 
 override_dh_auto_build:
 	mkdir  $(CURDIR)/build
 	docker run --rm -v "$(CURDIR)":/go/src/github.com/rdelval/australis -w /go/src/github.com/rdelval/australis golang:1.11 go build -o build/australis
+	build/australis autocomplete --filename=build/australis.bash

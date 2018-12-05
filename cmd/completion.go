@@ -5,7 +5,7 @@ import (
 )
 
 var completionCmd = &cobra.Command{
-	Use:   "completion",
+	Use:   "autocomplete",
 	Short: "Create auto completion for bash.",
 	Long: `Create auto completion bash file for australis. Auto completion file must be placed in the correct
 directory in order for bash to pick up the definitions.
@@ -18,10 +18,12 @@ In MacOS this directory is $(brew --prefix)/etc/bash_completion.d if auto comple
 	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
 	Run: func(cmd *cobra.Command, args []string) {
-		rootCmd.GenBashCompletionFile("australis.completion.sh")
+		rootCmd.GenBashCompletionFile(filename)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(completionCmd)
+
+	completionCmd.Flags().StringVar(&filename, "filename", "australis.completion.sh", "Path and name of the autocompletion file.")
 }

@@ -1,3 +1,9 @@
+0.0.6
+
+* Added auto-completion to the deb file.
+* Added set verb and quota noun to set quota resource for certain roles.
+* Added JSON output as an option for all commands.
+
 0.0.5
 
 * Backup and snapshot commands have now been moved to under the force subcommand as these are expensive operations

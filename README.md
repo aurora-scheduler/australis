@@ -54,3 +54,9 @@ Use "australis [command] --help" for more information about a command.
 
 ## Status
 Australis is a work in progress and does not support all the features of Apache Aurora.
+
+
+### Building debian file
+From root of the repository run:
+
+`debuild -d -us -uc -b`
