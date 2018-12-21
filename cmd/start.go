@@ -43,7 +43,7 @@ func init() {
 
 	// SLA Maintenance specific flags
 	startMaintenanceCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
-	startMaintenanceCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
+	startMaintenanceCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 10, "Time after which the monitor will stop polling and throw an error.")
 }
 
 var startCmd = &cobra.Command{
