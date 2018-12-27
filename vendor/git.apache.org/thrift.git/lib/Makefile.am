@@ -71,6 +71,10 @@ if WITH_DART
 SUBDIRS += dart
 endif
 
+if WITH_DOTNETCORE
+SUBDIRS += netcore
+endif
+
 if WITH_GO
 SUBDIRS += go
 endif
@@ -83,10 +87,19 @@ endif
 if WITH_NODEJS
 SUBDIRS += nodejs
 PRECROSS_TARGET += precross-nodejs
+SUBDIRS += nodets
 endif
 
 if WITH_LUA
 SUBDIRS += lua
+endif
+
+if WITH_RS
+SUBDIRS += rs
+endif
+
+if WITH_CL
+SUBDIRS += cl
 endif
 
 # All of the libs that don't use Automake need to go in here

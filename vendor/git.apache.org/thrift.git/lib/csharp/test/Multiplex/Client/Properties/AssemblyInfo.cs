@@ -27,9 +27,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MultiplexClient")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MultiplexClient")]
-[assembly: AssemblyCopyright("Copyright © 2013 The Apache Software Foundation")]
+[assembly: AssemblyCompany("The Apache Software Foundation")]
+[assembly: AssemblyProduct("Thrift")]
+[assembly: AssemblyCopyright("The Apache Software Foundation")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.12.0.0")]
+[assembly: AssemblyFileVersion("0.12.0.0")]
