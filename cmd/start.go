@@ -43,7 +43,7 @@ func init() {
 
 	// SLA Maintenance specific flags
 	startMaintenanceCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
-	startMaintenanceCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
+	startMaintenanceCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 10, "Time after which the monitor will stop polling and throw an error.")
 }
 
 var startCmd = &cobra.Command{
@@ -102,7 +102,7 @@ expects a space separated list of hosts to place into maintenance mode.`,
 func drain(cmd *cobra.Command, args []string) {
 	log.Infoln("Setting hosts to DRAINING")
 	log.Infoln(args)
-	_, result, err := client.DrainHosts(args...)
+	result, err := client.DrainHosts(args...)
 	if err != nil {
 		log.Fatalf("error: %+v\n", err)
 	}
@@ -110,16 +110,16 @@ func drain(cmd *cobra.Command, args []string) {
 	log.Debugln(result)
 
 	// Monitor change to DRAINING and DRAINED mode
-	hostResult, err := monitor.HostMaintenance(
+	hostResult, err := client.HostMaintenanceMonitor(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED},
-		int(monitorInterval.Seconds()),
-		int(monitorTimeout.Seconds()))
+		monitorInterval,
+		monitorTimeout)
 
 	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED})
 
 	if err != nil {
-		log.Fatalln("error: %+v", err)
+		log.Fatalln(err)
 	}
 }
 
@@ -133,11 +133,11 @@ func slaDrain(policy *aurora.SlaPolicy, hosts ...string) {
 	log.Debugln(result)
 
 	// Monitor change to DRAINING and DRAINED mode
-	hostResult, err := monitor.HostMaintenance(
+	hostResult, err := client.HostMaintenanceMonitor(
 		hosts,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED},
-		int(monitorInterval.Seconds()),
-		int(monitorTimeout.Seconds()))
+		monitorInterval,
+		monitorTimeout)
 
 	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED})
 
@@ -167,7 +167,7 @@ func SLAPercentageDrain(cmd *cobra.Command, args []string) {
 func maintenance(cmd *cobra.Command, args []string) {
 	log.Infoln("Setting hosts to Maintenance mode")
 	log.Infoln(args)
-	_, result, err := client.StartMaintenance(args...)
+	result, err := client.StartMaintenance(args...)
 	if err != nil {
 		log.Fatalf("error: %+v\n", err)
 	}
@@ -175,11 +175,11 @@ func maintenance(cmd *cobra.Command, args []string) {
 	log.Debugln(result)
 
 	// Monitor change to DRAINING and DRAINED mode
-	hostResult, err := monitor.HostMaintenance(
+	hostResult, err := client.HostMaintenanceMonitor(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED},
-		int(monitorInterval.Seconds()),
-		int(monitorTimeout.Seconds()))
+		monitorInterval,
+		monitorTimeout)
 
 
 	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED})

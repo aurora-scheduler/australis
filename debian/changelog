@@ -1,3 +1,9 @@
+australis (0.0.7) unstable; urgency=medium
+
+  * Upgraded australis to gorealis v2.
+
+ -- Renan DelValle <renanidelvalle@gmail.com>  Wed, 26 Dec 2018 15:10:00 -0700
+
 australis (0.0.6) unstable; urgency=medium
 
   * Added auto-completion to the deb file.

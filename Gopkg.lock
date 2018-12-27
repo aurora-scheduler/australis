@@ -2,13 +2,12 @@
 
 
 [[projects]]
-  branch = "0.10.0-http-client-fix"
-  digest = "1:2b8c4f3c06ddb304a24ba8a625aa9f583c5576743356fa41e48c63e1563021d2"
+  branch = "0.12.0"
+  digest = "1:89696c38cec777120b8b1bb5e2d363d655cf2e1e7d8c851919aaa0fd576d9b86"
   name = "git.apache.org/thrift.git"
   packages = ["lib/go/thrift"]
   pruneopts = ""
-  revision = "cb1afec972a85791e9b24a04b60fc9dbbfc3cda3"
-  source = "github.com/rdelval/thrift"
+  revision = "384647d290e2e4a55a14b1b7ef1b7e66293a2c33"
 
 [[projects]]
   digest = "1:eb53021a8aa3f599d29c7102e65026242bdedce998a54837dc67f14b6a97c5fd"
@@ -70,8 +69,7 @@
   version = "v1.1.2"
 
 [[projects]]
-  branch = "drainSLA"
-  digest = "1:154e4eb61c4f730b3b5962fc254e7aff9ddb9bab50efd6ab098fcfcad0e1920f"
+  digest = "1:0a57933aaf17a56940a600fbbe6ede0e0fcc92531d7b85a29f2a6352c12573ca"
   name = "github.com/paypal/gorealis"
   packages = [
     ".",
@@ -79,8 +77,8 @@
     "response",
   ]
   pruneopts = ""
-  revision = "f27dc4a6abf5a2ad8675d7a4ba0059309631e473"
-  source = "github.com/rdelval/gorealis"
+  revision = "b776bd301d9018b86253711e789eb2376ce60d1c"
+  version = "v2.0.0"
 
 [[projects]]
   digest = "1:894aef961c056b6d85d12bac890bf60c44e99b46292888bfa66caf529f804457"
@@ -210,6 +208,7 @@
     "git.apache.org/thrift.git/lib/go/thrift",
     "github.com/paypal/gorealis",
     "github.com/paypal/gorealis/gen-go/apache/aurora",
+    "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
     "github.com/spf13/pflag",

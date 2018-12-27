@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/paypal/gorealis/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
 	"time"
@@ -48,7 +47,7 @@ var stopUpdateCmd = &cobra.Command{
 func endMaintenance(cmd *cobra.Command, args []string) {
 	log.Println("Setting hosts to NONE maintenance status.")
 	log.Println(args)
-	_, result, err := client.EndMaintenance(args...)
+	result, err := client.EndMaintenance(args...)
 	if err != nil {
 		log.Fatalf("error: %+v\n", err)
 	}
@@ -56,12 +55,11 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 	log.Debugln(result)
 
 	// Monitor change to NONE mode
-	hostResult, err := monitor.HostMaintenance(
+	hostResult, err := client.HostMaintenanceMonitor(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE},
-		int(monitorInterval.Seconds()),
-		int(monitorTimeout.Seconds()))
-
+		monitorInterval,
+		monitorTimeout)
 
 	maintenanceMonitorPrint(hostResult,[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE})
 
@@ -78,7 +76,7 @@ func stopUpdate(cmd *cobra.Command, args []string) {
 
 	log.Infof("Stopping (aborting) update [%s/%s/%s] %s\n", *env, *role, *name, args[0])
 
-	resp, err := client.AbortJobUpdate(aurora.JobUpdateKey{
+	err := client.AbortJobUpdate(aurora.JobUpdateKey{
 		Job: &aurora.JobKey{Environment: *env, Role: *role, Name: *name},
 		ID:  args[0],
 	},
@@ -86,11 +84,5 @@ func stopUpdate(cmd *cobra.Command, args []string) {
 
 	if err != nil {
 		log.Fatalln(err)
-	}
-
-	if toJson{
-		fmt.Println(toJSON(resp.GetResult_()))
-	} else {
-		fmt.Println(resp.GetResult_())
 	}
 }

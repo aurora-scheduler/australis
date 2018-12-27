@@ -19,87 +19,94 @@ import (
 	"time"
 
 	"github.com/paypal/gorealis/gen-go/apache/aurora"
-	"github.com/paypal/gorealis/response"
 	"github.com/pkg/errors"
 )
 
 const (
 	UpdateFailed = "update failed"
 	RolledBack   = "update rolled back"
-	Timeout      = "timeout"
+	Timedout     = "timeout"
 )
 
-type Monitor struct {
-	Client Realis
-}
-
 // Polls the scheduler every certain amount of time to see if the update has succeeded
-func (m *Monitor) JobUpdate(updateKey aurora.JobUpdateKey, interval int, timeout int) (bool, error) {
+func (c *Client) JobUpdateMonitor(updateKey aurora.JobUpdateKey, interval, timeout time.Duration) (bool, error) {
+	if interval < 1*time.Second {
+		interval = interval * time.Second
+	}
+
+	if timeout < 1*time.Second {
+		timeout = timeout * time.Second
+	}
 
 	updateQ := aurora.JobUpdateQuery{
 		Key:   &updateKey,
 		Limit: 1,
 	}
-	ticker := time.NewTicker(time.Second * time.Duration(interval))
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
-	timer := time.NewTimer(time.Second * time.Duration(timeout))
+	timer := time.NewTimer(timeout)
 	defer timer.Stop()
-	var cliErr error
-	var respDetail *aurora.Response
 
 	for {
 		select {
 		case <-ticker.C:
-			respDetail, cliErr = m.Client.JobUpdateDetails(updateQ)
+			updateDetail, cliErr := c.JobUpdateDetails(updateQ)
 			if cliErr != nil {
 				return false, cliErr
 			}
 
-			updateDetail := response.JobUpdateDetails(respDetail)
-
 			if len(updateDetail) == 0 {
-				m.Client.RealisConfig().logger.Println("No update found")
+				c.RealisConfig().logger.Println("No update found")
 				return false, errors.New("No update found for " + updateKey.String())
 			}
+
 			status := updateDetail[0].Update.Summary.State.Status
 
-			if _, ok := aurora.ACTIVE_JOB_UPDATE_STATES[status]; !ok {
+			// Convert Thrift Set to Golang map for quick lookup
+			if _, ok := ActiveJobUpdateStates[status]; !ok {
 
 				// Rolled forward is the only state in which an update has been successfully updated
 				// if we encounter an inactive state and it is not at rolled forward, update failed
 				switch status {
 				case aurora.JobUpdateStatus_ROLLED_FORWARD:
-					m.Client.RealisConfig().logger.Println("Update succeeded")
+					c.RealisConfig().logger.Println("Update succeeded")
 					return true, nil
 				case aurora.JobUpdateStatus_FAILED:
-					m.Client.RealisConfig().logger.Println("Update failed")
+					c.RealisConfig().logger.Println("Update failed")
 					return false, errors.New(UpdateFailed)
 				case aurora.JobUpdateStatus_ROLLED_BACK:
-					m.Client.RealisConfig().logger.Println("rolled back")
+					c.RealisConfig().logger.Println("rolled back")
 					return false, errors.New(RolledBack)
 				default:
 					return false, nil
 				}
 			}
 		case <-timer.C:
-			return false, errors.New(Timeout)
+			return false, errors.New(Timedout)
 		}
 	}
 }
 
-// Monitor a Job until all instances enter one of the LIVE_STATES
-func (m *Monitor) Instances(key *aurora.JobKey, instances int32, interval, timeout int) (bool, error) {
-	return m.ScheduleStatus(key, instances, aurora.LIVE_STATES, interval, timeout)
+// Monitor a AuroraJob until all instances enter one of the LiveStates
+func (c *Client) InstancesMonitor(key aurora.JobKey, instances int32, interval, timeout time.Duration) (bool, error) {
+	return c.ScheduleStatusMonitor(key, instances, aurora.LIVE_STATES, interval, timeout)
 }
 
-// Monitor a Job until all instances enter a desired status.
+// Monitor a AuroraJob until all instances enter a desired status.
 // Defaults sets of desired statuses provided by the thrift API include:
-// ACTIVE_STATES, SLAVE_ASSIGNED_STATES, LIVE_STATES, and TERMINAL_STATES
-func (m *Monitor) ScheduleStatus(key *aurora.JobKey, instanceCount int32, desiredStatuses map[aurora.ScheduleStatus]bool, interval, timeout int) (bool, error) {
+// ActiveStates, SlaveAssignedStates, LiveStates, and TerminalStates
+func (c *Client) ScheduleStatusMonitor(key aurora.JobKey, instanceCount int32, desiredStatuses []aurora.ScheduleStatus, interval, timeout time.Duration) (bool, error) {
+	if interval < 1*time.Second {
+		interval = interval * time.Second
+	}
 
-	ticker := time.NewTicker(time.Second * time.Duration(interval))
+	if timeout < 1*time.Second {
+		timeout = timeout * time.Second
+	}
+
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
-	timer := time.NewTimer(time.Second * time.Duration(timeout))
+	timer := time.NewTimer(timeout)
 	defer timer.Stop()
 
 	for {
@@ -107,7 +114,7 @@ func (m *Monitor) ScheduleStatus(key *aurora.JobKey, instanceCount int32, desire
 		case <-ticker.C:
 
 			// Query Aurora for the state of the job key ever interval
-			instCount, cliErr := m.Client.GetInstanceIds(key, desiredStatuses)
+			instCount, cliErr := c.GetInstanceIds(key, desiredStatuses)
 			if cliErr != nil {
 				return false, errors.Wrap(cliErr, "Unable to communicate with Aurora")
 			}
@@ -117,14 +124,21 @@ func (m *Monitor) ScheduleStatus(key *aurora.JobKey, instanceCount int32, desire
 		case <-timer.C:
 
 			// If the timer runs out, return a timeout error to user
-			return false, errors.New(Timeout)
+			return false, errors.New(Timedout)
 		}
 	}
 }
 
 // Monitor host status until all hosts match the status provided. Returns a map where the value is true if the host
 // is in one of the desired mode(s) or false if it is not as of the time when the monitor exited.
-func (m *Monitor) HostMaintenance(hosts []string, modes []aurora.MaintenanceMode, interval, timeout int) (map[string]bool, error) {
+func (c *Client) HostMaintenanceMonitor(hosts []string, modes []aurora.MaintenanceMode, interval, timeout time.Duration) (map[string]bool, error) {
+	if interval < 1*time.Second {
+		interval = interval * time.Second
+	}
+
+	if timeout < 1*time.Second {
+		timeout = timeout * time.Second
+	}
 
 	//  Transform modes to monitor for into a set for easy lookup
 	desiredMode := make(map[aurora.MaintenanceMode]struct{})
@@ -142,16 +156,16 @@ func (m *Monitor) HostMaintenance(hosts []string, modes []aurora.MaintenanceMode
 
 	hostResult := make(map[string]bool)
 
-	ticker := time.NewTicker(time.Second * time.Duration(interval))
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
-	timer := time.NewTimer(time.Second * time.Duration(timeout))
+	timer := time.NewTimer(timeout)
 	defer timer.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
 			// Client call has multiple retries internally
-			_, result, err := m.Client.MaintenanceStatus(hosts...)
+			result, err := c.MaintenanceStatus(hosts...)
 			if err != nil {
 				// Error is either a payload error or a severe connection error
 				for host := range remainingHosts {
@@ -160,7 +174,7 @@ func (m *Monitor) HostMaintenance(hosts []string, modes []aurora.MaintenanceMode
 				return hostResult, errors.Wrap(err, "client error in monitor")
 			}
 
-			for status := range result.GetStatuses() {
+			for _, status := range result.GetStatuses() {
 
 				if _, ok := desiredMode[status.GetMode()]; ok {
 					hostResult[status.GetHost()] = true
@@ -177,7 +191,7 @@ func (m *Monitor) HostMaintenance(hosts []string, modes []aurora.MaintenanceMode
 				hostResult[host] = false
 			}
 
-			return hostResult, errors.New(Timeout)
+			return hostResult, errors.New(Timedout)
 		}
 	}
 }

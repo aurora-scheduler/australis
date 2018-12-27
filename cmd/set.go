@@ -72,15 +72,9 @@ func setQuota(cmd *cobra.Command, args []string) {
 	log.Println("Setting Quota resources for role.")
 	log.Println(args)
 
-	resp, err := client.SetQuota(*role, &cpu, &ram, &disk)
+	err := client.SetQuota(*role, &cpu, &ram, &disk)
 
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	if toJson{
-		fmt.Println(toJSON(resp.GetResult_()))
-	} else {
-		fmt.Println(resp.GetResult_())
 	}
 }
