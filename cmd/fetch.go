@@ -119,7 +119,7 @@ func fetchTasks(cmd *cobra.Command, args []string) {
 
 func fetchStatus(cmd *cobra.Command, args []string) {
 	log.Infof("Fetching maintenance status for %v \n", args)
-	_, result, err := client.MaintenanceStatus(args...)
+	result, err := client.MaintenanceStatus(args...)
 	if err != nil {
 		log.Fatalf("error: %+v\n", err)
 	}
@@ -127,7 +127,7 @@ func fetchStatus(cmd *cobra.Command, args []string) {
 	if toJson {
 		fmt.Println(toJSON(result.Statuses))
 	} else {
-		for k := range result.Statuses {
+		for _, k := range result.GetStatuses() {
 			fmt.Printf("Result: %s:%s\n", k.Host, k.Mode)
 		}
 	}
@@ -162,7 +162,7 @@ func fetchJobs(cmd *cobra.Command, args []string) {
 		*role = ""
 	}
 
-	_, result, err := client.GetJobs(*role)
+	result, err := client.GetJobs(*role)
 
 	if err != nil {
 		log.Fatalf("error: %+v\n", err)
@@ -171,7 +171,7 @@ func fetchJobs(cmd *cobra.Command, args []string) {
 	if toJson {
 		var configSlice []*aurora.JobConfiguration
 
-		for config := range result.GetConfigs() {
+		for _, config := range result.GetConfigs() {
 			configSlice = append(configSlice, config)
 		}
 

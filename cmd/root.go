@@ -15,8 +15,7 @@ var username, password, zkAddr, schedAddr string
 var env, role, name = new(string), new(string), new(string)
 var ram, disk int64
 var cpu float64
-var client realis.Realis
-var monitor *realis.Monitor
+var client *realis.Client
 var skipCertVerification bool
 var caCertsPath string
 var clientKey, clientCert string
@@ -28,7 +27,7 @@ var percent float64
 var count int64
 var filename string
 
-const australisVer = "v0.0.6"
+const australisVer = "v0.0.7"
 
 var monitorInterval, monitorTimeout time.Duration
 
@@ -119,7 +118,7 @@ func connect(cmd *cobra.Command, args []string) {
 
 	realisOptions := []realis.ClientOption{realis.BasicAuth(username, password),
 		realis.ThriftJSON(),
-		realis.TimeoutMS(20000),
+		realis.Timeout(20 * time.Second),
 		realis.BackOff(realis.Backoff{
 			Steps:    2,
 			Duration: 10 * time.Second,
@@ -141,16 +140,15 @@ func connect(cmd *cobra.Command, args []string) {
 	// Client certificate configuration if available
 	if clientKey != "" || clientCert != "" || caCertsPath != "" {
 		realisOptions = append(realisOptions,
-			realis.Certspath(caCertsPath),
+			realis.CertsPath(caCertsPath),
 			realis.ClientCerts(clientKey, clientCert),
 			realis.InsecureSkipVerify(skipCertVerification))
 	}
 
 	// Connect to Aurora Scheduler and create a client object
-	client, err = realis.NewRealisClient(realisOptions...)
+	client, err = realis.NewClient(realisOptions...)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	monitor = &realis.Monitor{Client: client}
 }

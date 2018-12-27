@@ -1,3 +1,7 @@
+0.0.7
+
+* Initial migration to gorealis v2
+
 0.0.6
 
 * Added auto-completion to the deb file.

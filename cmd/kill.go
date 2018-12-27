@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/paypal/gorealis"
 	"github.com/spf13/cobra"
 
@@ -53,19 +51,13 @@ func killJob(cmd *cobra.Command, args []string) {
 		Environment(*env).
 		Role(*role).
 		Name(*name)
-	resp, err := client.KillJob(job.JobKey())
+	err := client.KillJob(job.JobKey())
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	if ok, err := monitor.Instances(job.JobKey(), 0, 5, 50); !ok || err != nil {
+	if ok, err := client.InstancesMonitor(job.JobKey(), 0, 5, 50); !ok || err != nil {
 		log.Fatalln("Unable to kill all instances of job")
-	}
-
-	if toJson {
-		fmt.Println(toJSON(resp.GetResult_()))
-	} else {
-		fmt.Println(resp.GetResult_())
 	}
 }
 
