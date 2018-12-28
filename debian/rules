@@ -16,5 +16,5 @@ clean:
 
 override_dh_auto_build:
 	mkdir  $(CURDIR)/build
-	docker run --rm -v "$(CURDIR)":/go/src/github.com/rdelval/australis -w /go/src/github.com/rdelval/australis golang:1.11 go build -o build/australis
+	/usr/local/go/bin/go build -o build/australis
 	build/australis autocomplete --filename=build/australis.bash
