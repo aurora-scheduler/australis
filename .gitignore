@@ -4,3 +4,5 @@ debian/debhelper-build-stamp
 debian/files
 debian/australis.substvars
 build/
+dist/
+.idea/
