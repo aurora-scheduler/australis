@@ -24,6 +24,8 @@ github.com/mitchellh/mapstructure v1.1.2 h1:fmNYVwqnSfB9mZU6OS2O6GsXM+wcskZDuKQz
 github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
 github.com/paypal/gorealis v0.0.0-20181219011448-e4e8a1c0b333 h1:eR+G8xTWhJ6k3bs+x0lrHmmp41CjNKRdGu7S6hYFs4k=
 github.com/paypal/gorealis v0.0.0-20181219011448-e4e8a1c0b333/go.mod h1:trnpzEqR5XeSaZNKE+QPtJaoIncPmbhGvEqgAP34+DA=
+github.com/paypal/gorealis/v2 v2.0.1 h1:7V9jjoeRWeVWaTm9Fgc08gWq1/k/sebVDe2WeFWAVGA=
+github.com/paypal/gorealis/v2 v2.0.1/go.mod h1:mJz1e40v9vHyw8dDvzGvblHcCtFuJ+eo7yPjFYnowhE=
 github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181zc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pkg/errors v0.0.0-20171216070316-e881fd58d78e h1:+RHxT/gm0O3UF7nLJbdNzAmULvCFt4XfXHWzh3XI/zs=

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/paypal/gorealis/gen-go/apache/aurora"
+	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
 	"time"
 

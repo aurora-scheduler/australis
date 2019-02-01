@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/spf13/pflag"
 
-	"github.com/paypal/gorealis"
-	"github.com/paypal/gorealis/gen-go/apache/aurora"
+	"github.com/paypal/gorealis/v2"
+	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"

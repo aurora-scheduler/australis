@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/paypal/gorealis"
+	"github.com/paypal/gorealis/v2"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
