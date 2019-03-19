@@ -151,7 +151,11 @@ func fetchTasksStatus(cmd *cobra.Command, args []string) {
 		role = nil
 	}
 	//TODO: Add filtering down by status
-	taskQuery := &aurora.TaskQuery{Environment: env, Role: role, JobName: name}
+	taskQuery := &aurora.TaskQuery{
+		Environment: env,
+		Role:        role,
+		JobName:     name,
+		Statuses:    aurora.LIVE_STATES}
 
 	tasks, err := client.GetTaskStatus(taskQuery)
 	if err != nil {

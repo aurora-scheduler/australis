@@ -31,7 +31,7 @@ var message = new(string)
 var updateID string
 var log = logrus.New()
 
-const australisVer = "v0.0.8"
+const australisVer = "v0.0.6"
 
 var monitorInterval, monitorTimeout time.Duration
 
