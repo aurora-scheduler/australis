@@ -8,7 +8,7 @@ import (
 	"github.com/paypal/gorealis/v2"
 	"github.com/spf13/cobra"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 var username, password, zkAddr, schedAddr string
@@ -28,8 +28,9 @@ var count int64
 var filename string
 var message = new(string)
 var updateID string
+var log = logrus.New()
 
-const australisVer = "v0.0.7"
+const australisVer = "v0.0.8"
 
 var monitorInterval, monitorTimeout time.Duration
 
@@ -68,7 +69,7 @@ func Execute() {
 
 // TODO(rdelvalle): Move more from connect into this function
 func setConfig(cmd *cobra.Command, args []string) {
-	lvl, err := log.ParseLevel(logLevel)
+	lvl, err := logrus.ParseLevel(logLevel)
 
 	if err != nil {
 		log.Fatalf("Log level %v is not valid\n", logLevel)
@@ -126,7 +127,8 @@ func connect(cmd *cobra.Command, args []string) {
 			Duration: 10 * time.Second,
 			Factor:   2.0,
 			Jitter:   0.1,
-		})}
+		}),
+		realis.SetLogger(log)}
 
 	// Prefer zookeeper if both ways of connecting are provided
 	if len(zkAddrSlice) > 0 && zkAddrSlice[0] != "" {

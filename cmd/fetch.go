@@ -2,13 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/pflag"
 
 	"github.com/paypal/gorealis/v2"
 	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
+	"github.com/spf13/pflag"
 )
 
 func init() {
@@ -17,10 +15,20 @@ func init() {
 	// Sub-commands
 
 	// Fetch Task Config
-	fetchCmd.AddCommand(taskConfigCmd)
+	fetchCmd.AddCommand(fetchTaskCmd)
+
+	// Fetch Task Config
+	fetchTaskCmd.AddCommand(taskConfigCmd)
 	taskConfigCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
 	taskConfigCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	taskConfigCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
+
+	// Fetch Task Status
+	fetchTaskCmd.AddCommand(taskStatusCmd)
+	taskStatusCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
+	taskStatusCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
+	taskStatusCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
+
 
 	/* Fetch Leader */
 	leaderCmd.Flags().String("zkPath", "/aurora/scheduler", "Zookeeper node path where leader election happens")
@@ -53,11 +61,24 @@ var fetchCmd = &cobra.Command{
 	Short: "Fetch information from Aurora",
 }
 
+var fetchTaskCmd = &cobra.Command{
+	Use:   "task",
+	Short: "Task information from Aurora",
+}
+
+
 var taskConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Fetch a list of task configurations from Aurora.",
 	Long:  `To be written.`,
-	Run:   fetchTasks,
+	Run:   fetchTasksConfig,
+}
+
+var taskStatusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Fetch task status for a Job key.",
+	Long:  `To be written.`,
+	Run:   fetchTasksStatus,
 }
 
 var leaderCmd = &cobra.Command{
@@ -83,11 +104,11 @@ var fetchStatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Fetch the maintenance status of a node from Aurora",
 	Long:  `This command will print the actual status of the mesos agent nodes in Aurora server`,
-	Run:   fetchStatus,
+	Run:   fetchHostStatus,
 }
 
-func fetchTasks(cmd *cobra.Command, args []string) {
-	fmt.Printf("Fetching job configuration for [%s/%s/%s] \n", env, role, name)
+func fetchTasksConfig(cmd *cobra.Command, args []string) {
+	log.Infof("Fetching job configuration for [%s/%s/%s] \n", *env, *role, *name)
 
 	// Task Query takes nil for values it shouldn't need to match against.
 	// This allows us to potentially more expensive calls for specific environments, roles, or job names.
@@ -117,7 +138,38 @@ func fetchTasks(cmd *cobra.Command, args []string) {
 	}
 }
 
-func fetchStatus(cmd *cobra.Command, args []string) {
+func fetchTasksStatus(cmd *cobra.Command, args []string) {
+	log.Infof("Fetching task status for [%s/%s/%s] \n", *env, *role, *name)
+
+	// Task Query takes nil for values it shouldn't need to match against.
+	// This allows us to potentially more expensive calls for specific environments, roles, or job names.
+	if *env == "" {
+		env = nil
+	}
+	if *role == "" {
+		role = nil
+	}
+	if *role == "" {
+		role = nil
+	}
+	//TODO: Add filtering down by status
+	taskQuery := &aurora.TaskQuery{Environment: env, Role: role, JobName: name}
+
+	tasks, err := client.GetTaskStatus(taskQuery)
+	if err != nil {
+		log.Fatalf("error: %+v\n", err)
+	}
+
+	if toJson {
+		fmt.Println(toJSON(tasks))
+	} else {
+		for _, t := range tasks {
+			fmt.Println(t)
+		}
+	}
+}
+
+func fetchHostStatus(cmd *cobra.Command, args []string) {
 	log.Infof("Fetching maintenance status for %v \n", args)
 	result, err := client.MaintenanceStatus(args...)
 	if err != nil {

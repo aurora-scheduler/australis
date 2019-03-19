@@ -3,8 +3,6 @@ package cmd
 import (
 	"github.com/paypal/gorealis/v2"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func init() {

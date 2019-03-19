@@ -4,9 +4,9 @@ import (
     "bytes"
     "encoding/json"
     "fmt"
-	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
+	"github.com/sirupsen/logrus"
 )
 
 func toJSON(v interface{}) string {
@@ -25,7 +25,7 @@ func getLoggingLevels() string {
 
     var buffer bytes.Buffer
 
-    for _, level := range log.AllLevels {
+    for _, level := range logrus.AllLevels {
         buffer.WriteString(level.String())
         buffer.WriteString(" ")
     }

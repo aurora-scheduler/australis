@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
-	"github.com/spf13/cobra"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
+	"github.com/spf13/cobra"
 )
 
 func init() {
