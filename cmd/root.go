@@ -26,6 +26,8 @@ var duration time.Duration
 var percent float64
 var count int64
 var filename string
+var message = new(string)
+var updateID string
 
 const australisVer = "v0.0.7"
 
