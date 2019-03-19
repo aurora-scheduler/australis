@@ -1,47 +1,46 @@
 package cmd
 
 import (
+	"time"
+
 	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 func init() {
 	rootCmd.AddCommand(startCmd)
 
-
 	// Sub-commands
 	startCmd.AddCommand(startDrainCmd)
 
 	// Maintenance specific flags
-	startDrainCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
-	startDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 10, "Time after which the monitor will stop polling and throw an error.")
+	startDrainCmd.Flags().DurationVar(&monitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
+	startDrainCmd.Flags().DurationVar(&monitorTimeout, "timeout", time.Minute*10, "Time after which the monitor will stop polling and throw an error.")
 
 	startCmd.AddCommand(startSLADrainCmd)
-
 
 	/* SLA Aware commands */
 	startSLADrainCmd.AddCommand(startSLACountDrainCmd)
 
 	// SLA Maintenance specific flags
-	startSLACountDrainCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
-	startSLACountDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 20, "Time after which the monitor will stop polling and throw an error.")
+	startSLACountDrainCmd.Flags().DurationVar(&monitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
+	startSLACountDrainCmd.Flags().DurationVar(&monitorTimeout, "timeout", time.Minute*20, "Time after which the monitor will stop polling and throw an error.")
 	startSLACountDrainCmd.Flags().Int64Var(&count, "count", 5, "Instances count that should be running to meet SLA.")
-	startSLACountDrainCmd.Flags().DurationVar(&duration, "duration", time.Minute * 10, "Window of time from which we derive the SLA.")
+	startSLACountDrainCmd.Flags().DurationVar(&duration, "duration", time.Minute*10, "Window of time from which we derive the SLA.")
 
 	startSLADrainCmd.AddCommand(startSLAPercentageDrainCmd)
 
 	// SLA Maintenance specific flags
-	startSLAPercentageDrainCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
-	startSLAPercentageDrainCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 1, "Time after which the monitor will stop polling and throw an error.")
-    startSLAPercentageDrainCmd.Flags().Float64Var(&percent, "percent", 75.0, "Percentage of instances that should be running to meet SLA.")
-	startSLAPercentageDrainCmd.Flags().DurationVar(&duration, "duration", time.Minute * 10, "Window of time from which we derive the SLA.")
+	startSLAPercentageDrainCmd.Flags().DurationVar(&monitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
+	startSLAPercentageDrainCmd.Flags().DurationVar(&monitorTimeout, "timeout", time.Minute*1, "Time after which the monitor will stop polling and throw an error.")
+	startSLAPercentageDrainCmd.Flags().Float64Var(&percent, "percent", 75.0, "Percentage of instances that should be running to meet SLA.")
+	startSLAPercentageDrainCmd.Flags().DurationVar(&duration, "duration", time.Minute*10, "Window of time from which we derive the SLA.")
 
 	startCmd.AddCommand(startMaintenanceCmd)
 
 	// SLA Maintenance specific flags
-	startMaintenanceCmd.Flags().DurationVar(&monitorInterval,"interval", time.Second * 5, "Interval at which to poll scheduler.")
-	startMaintenanceCmd.Flags().DurationVar(&monitorTimeout,"timeout", time.Minute * 10, "Time after which the monitor will stop polling and throw an error.")
+	startMaintenanceCmd.Flags().DurationVar(&monitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
+	startMaintenanceCmd.Flags().DurationVar(&monitorTimeout, "timeout", time.Minute*10, "Time after which the monitor will stop polling and throw an error.")
 }
 
 var startCmd = &cobra.Command{
@@ -150,7 +149,7 @@ func SLACountDrain(cmd *cobra.Command, args []string) {
 
 	slaDrain(&aurora.SlaPolicy{
 		CountSlaPolicy: &aurora.CountSlaPolicy{Count: count, DurationSecs: int64(duration.Seconds())}},
-	args...)
+		args...)
 }
 
 func SLAPercentageDrain(cmd *cobra.Command, args []string) {
@@ -159,7 +158,7 @@ func SLAPercentageDrain(cmd *cobra.Command, args []string) {
 
 	slaDrain(&aurora.SlaPolicy{
 		PercentageSlaPolicy: &aurora.PercentageSlaPolicy{Percentage: percent, DurationSecs: int64(duration.Seconds())}},
-	args...)
+		args...)
 }
 
 func maintenance(cmd *cobra.Command, args []string) {
@@ -178,7 +177,6 @@ func maintenance(cmd *cobra.Command, args []string) {
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED},
 		monitorInterval,
 		monitorTimeout)
-
 
 	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED})
 

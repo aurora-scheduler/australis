@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"github.com/spf13/viper"
 	"strings"
 	"time"
 
-	"github.com/paypal/gorealis/v2"
+	"github.com/spf13/viper"
+
+	realis "github.com/paypal/gorealis/v2"
 	"github.com/spf13/cobra"
 
 	"github.com/sirupsen/logrus"
@@ -46,9 +47,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&clientCert, "clientCert", "c", "", "Client certificate to use to connect to Aurora.")
 	rootCmd.PersistentFlags().StringVarP(&caCertsPath, "caCertsPath", "a", "", "Path where CA certificates can be found.")
 	rootCmd.PersistentFlags().BoolVarP(&skipCertVerification, "skipCertVerification", "i", false, "Skip CA certificate hostname verification.")
-	rootCmd.PersistentFlags().StringVar(&configFile, "config",  "/etc/aurora/australis.yml", "Config file to use.")
-	rootCmd.PersistentFlags().BoolVar(&toJson, "toJSON",  false, "Print output in JSON format.")
-	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l",  "info", "Set logging level [" + getLoggingLevels() + "].")
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "/etc/aurora/australis.yml", "Config file to use.")
+	rootCmd.PersistentFlags().BoolVar(&toJson, "toJSON", false, "Print output in JSON format.")
+	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info", "Set logging level ["+getLoggingLevels()+"].")
 }
 
 var rootCmd = &cobra.Command{
@@ -79,45 +80,44 @@ func setConfig(cmd *cobra.Command, args []string) {
 }
 
 func connect(cmd *cobra.Command, args []string) {
-    var err error
+	var err error
 
+	setConfig(cmd, args)
 
-    setConfig(cmd, args)
+	zkAddrSlice := strings.Split(zkAddr, ",")
 
-    zkAddrSlice := strings.Split(zkAddr, ",")
+	viper.SetConfigFile(configFile)
+	err = viper.ReadInConfig()
+	if err == nil {
+		// Best effort load configuration. Will only set config values when flags have not set them already.
+		if viper.IsSet("zk") && len(zkAddrSlice) == 1 && zkAddrSlice[0] == "" {
+			zkAddrSlice = viper.GetStringSlice("zk")
+		}
 
-    viper.SetConfigFile(configFile)
-    err = viper.ReadInConfig()
-    if err == nil {
-        // Best effort load configuration. Will only set config values when flags have not set them already.
-        if viper.IsSet("zk") && len(zkAddrSlice) == 1 && zkAddrSlice[0] == "" {
-            zkAddrSlice = viper.GetStringSlice("zk")
-        }
+		if viper.IsSet("username") && username == "" {
+			username = viper.GetString("username")
+		}
 
-        if viper.IsSet("username") && username == "" {
-            username = viper.GetString("username")
-        }
+		if viper.IsSet("password") && password == "" {
+			password = viper.GetString("password")
+		}
 
-        if viper.IsSet("password") && password == "" {
-            password = viper.GetString("password")
-        }
+		if viper.IsSet("clientKey") && clientKey == "" {
+			clientKey = viper.GetString("clientKey")
+		}
 
-        if viper.IsSet("clientKey") && clientKey == "" {
-            clientKey = viper.GetString("clientKey")
-        }
+		if viper.IsSet("clientCert") && clientCert == "" {
+			clientCert = viper.GetString("clientCert")
+		}
 
-        if viper.IsSet("clientCert") && clientCert == "" {
-            clientCert = viper.GetString("clientCert")
-        }
+		if viper.IsSet("caCertsPath") && caCertsPath == "" {
+			caCertsPath = viper.GetString("caCertsPath")
+		}
 
-        if viper.IsSet("caCertsPath") && caCertsPath == "" {
-            caCertsPath = viper.GetString("caCertsPath")
-        }
-
-        if viper.IsSet("skipCertVerification") && !skipCertVerification {
-            skipCertVerification = viper.GetBool("skipCertVerification")
-        }
-    }
+		if viper.IsSet("skipCertVerification") && !skipCertVerification {
+			skipCertVerification = viper.GetBool("skipCertVerification")
+		}
+	}
 
 	realisOptions := []realis.ClientOption{realis.BasicAuth(username, password),
 		realis.ThriftJSON(),
@@ -133,7 +133,7 @@ func connect(cmd *cobra.Command, args []string) {
 	// Prefer zookeeper if both ways of connecting are provided
 	if len(zkAddrSlice) > 0 && zkAddrSlice[0] != "" {
 		// Configure Zookeeper to connect
-		zkOptions := []realis.ZKOpt{ realis.ZKEndpoints(zkAddrSlice...), realis.ZKPath("/aurora/scheduler")}
+		zkOptions := []realis.ZKOpt{realis.ZKEndpoints(zkAddrSlice...), realis.ZKPath("/aurora/scheduler")}
 		realisOptions = append(realisOptions, realis.ZookeeperOptions(zkOptions...))
 	} else if schedAddr != "" {
 		realisOptions = append(realisOptions, realis.SchedulerUrl(schedAddr))

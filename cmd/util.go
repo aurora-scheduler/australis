@@ -1,9 +1,9 @@
 package cmd
 
 import (
-    "bytes"
-    "encoding/json"
-    "fmt"
+	"bytes"
+	"encoding/json"
+	"fmt"
 
 	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
 	"github.com/sirupsen/logrus"
@@ -11,38 +11,36 @@ import (
 
 func toJSON(v interface{}) string {
 
-    output, err := json.Marshal(v)
+	output, err := json.Marshal(v)
 
-    if err != nil {
-        log.Fatalln("Unable to serialize Aurora response: %+v", v)
-    }
+	if err != nil {
+		log.Fatalln("Unable to serialize Aurora response: %+v", v)
+	}
 
-    return string(output)
+	return string(output)
 }
-
 
 func getLoggingLevels() string {
 
-    var buffer bytes.Buffer
+	var buffer bytes.Buffer
 
-    for _, level := range logrus.AllLevels {
-        buffer.WriteString(level.String())
-        buffer.WriteString(" ")
-    }
+	for _, level := range logrus.AllLevels {
+		buffer.WriteString(level.String())
+		buffer.WriteString(" ")
+	}
 
-    buffer.Truncate(buffer.Len()-1)
+	buffer.Truncate(buffer.Len() - 1)
 
-    return buffer.String()
+	return buffer.String()
 
 }
-
 
 func maintenanceMonitorPrint(hostResult map[string]bool, desiredStates []aurora.MaintenanceMode) {
 	if len(hostResult) > 0 {
 		// Create anonymous struct for JSON formatting
-		output := struct{
-			DesiredStates []string `json:desired_states`
-			Transitioned []string `json:transitioned`
+		output := struct {
+			DesiredStates   []string `json:desired_states`
+			Transitioned    []string `json:transitioned`
 			NonTransitioned []string `json:non-transitioned`
 		}{
 			make([]string, 0),
@@ -50,7 +48,7 @@ func maintenanceMonitorPrint(hostResult map[string]bool, desiredStates []aurora.
 			make([]string, 0),
 		}
 
-		for _,state := range desiredStates {
+		for _, state := range desiredStates {
 			output.DesiredStates = append(output.DesiredStates, state.String())
 		}
 

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/paypal/gorealis/v2"
+	realis "github.com/paypal/gorealis/v2"
 	"github.com/spf13/cobra"
 )
 

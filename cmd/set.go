@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -32,7 +33,7 @@ var setQuotaCmd = &cobra.Command{
 
 		*role = args[0]
 
-		for i:=1; i < len(args); i++ {
+		for i := 1; i < len(args); i++ {
 			resourcePair := strings.Split(args[i], ":")
 
 			if len(resourcePair) != 2 {
@@ -53,7 +54,7 @@ var setQuotaCmd = &cobra.Command{
 					return errors.Wrap(err, "unable to convert RAM value provided to a integer number")
 				}
 
-            case "disk":
+			case "disk":
 				disk, err = strconv.ParseInt(resourcePair[1], 10, 64)
 				if err != nil {
 					return errors.Wrap(err, "unable to convert DISK value provided to a integer number")

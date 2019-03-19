@@ -12,7 +12,7 @@ func init() {
 
 	// Sub-commands
 	forceCmd.AddCommand(forceSnapshotCmd)
-    forceCmd.AddCommand(forceBackupCmd)
+	forceCmd.AddCommand(forceBackupCmd)
 
 	// Recon sub-commands
 	forceCmd.AddCommand(reconCmd)
@@ -30,7 +30,7 @@ var forceSnapshotCmd = &cobra.Command{
 	Short: "Force the leading scheduler to perform a Snapshot.",
 	Long: `Takes a Snapshot of the in memory state of the Apache Aurora cluster and
 writes it to the Mesos replicated log. This should NOT be confused with a backup.`,
-	Run:  snapshot,
+	Run: snapshot,
 }
 
 func snapshot(cmd *cobra.Command, args []string) {
@@ -48,7 +48,7 @@ var forceBackupCmd = &cobra.Command{
 	Short: "Force the leading scheduler to perform a Backup.",
 	Long: `Force the Aurora Scheduler to write a backup of the latest snapshot to the filesystem 
 of the leading scheduler.`,
-	Run:  backup,
+	Run: backup,
 }
 
 func backup(cmd *cobra.Command, args []string) {
@@ -95,16 +95,16 @@ func explicitRecon(cmd *cobra.Command, args []string) {
 	case 1:
 		log.Infof("Using %v as batch size for explicit recon.\n", args[0])
 
-	    // Get batch size from args and convert it to the right format
+		// Get batch size from args and convert it to the right format
 		batchInt, err := strconv.Atoi(args[0])
-        if err != nil {
-            log.Fatalf("error: %+v\n", err)
-        }
+		if err != nil {
+			log.Fatalf("error: %+v\n", err)
+		}
 
 		batchInt32 := int32(batchInt)
 		batchSize = &batchInt32
-    default:
-        log.Fatalln("Provide 0 arguments to use default batch size or one argument to use a custom batch size.")
+	default:
+		log.Fatalln("Provide 0 arguments to use default batch size or one argument to use a custom batch size.")
 	}
 
 	err := client.ForceExplicitTaskReconciliation(batchSize)
@@ -120,7 +120,7 @@ var forceImplicitReconCmd = &cobra.Command{
 	Short: "Force the leading scheduler to perform an implicit recon.",
 	Long: `Forces leading scheduler to ask Mesos Master for a list of the latest state for
 all currently known non-terminal tasks being run by Aurora.`,
-	Run:  implicitRecon,
+	Run: implicitRecon,
 }
 
 func implicitRecon(cmd *cobra.Command, args []string) {

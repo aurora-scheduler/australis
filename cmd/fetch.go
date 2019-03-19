@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/paypal/gorealis/v2"
+	realis "github.com/paypal/gorealis/v2"
 	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -29,7 +29,6 @@ func init() {
 	taskStatusCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	taskStatusCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
 
-
 	/* Fetch Leader */
 	leaderCmd.Flags().String("zkPath", "/aurora/scheduler", "Zookeeper node path where leader election happens")
 
@@ -37,9 +36,9 @@ func init() {
 
 	// Hijack help function to hide unnecessary global flags
 	help := leaderCmd.HelpFunc()
-	leaderCmd.SetHelpFunc(func(cmd *cobra.Command, s []string){
-		if cmd.HasInheritedFlags(){
-			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag){
+	leaderCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+		if cmd.HasInheritedFlags() {
+			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag) {
 				if f.Name != "logLevel" {
 					f.Hidden = true
 				}
@@ -66,7 +65,6 @@ var fetchTaskCmd = &cobra.Command{
 	Short: "Task information from Aurora",
 }
 
-
 var taskConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Fetch a list of task configurations from Aurora.",
@@ -86,7 +84,7 @@ var leaderCmd = &cobra.Command{
 	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
 	PreRun:            setConfig,
-	Args: cobra.MinimumNArgs(1),
+	Args:              cobra.MinimumNArgs(1),
 	Short:             "Fetch current Aurora leader given Zookeeper nodes. ",
 	Long: `Gets the current leading aurora scheduler instance using information from Zookeeper path.
 Pass Zookeeper nodes separated by a space as an argument to this command.`,
