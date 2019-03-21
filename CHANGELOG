@@ -1,6 +1,8 @@
 0.0.7
 
 * Initial migration to gorealis v2
+* Implemented first version of create feature which takes in a YAML file.
+* Added new noun to fetch status called task. Task also has two subcommands, status and config.
 
 0.0.6
 

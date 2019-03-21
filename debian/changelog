@@ -1,6 +1,8 @@
 australis (0.0.7) unstable; urgency=medium
 
   * Upgraded australis to gorealis v2.
+  * Implemented first version of create feature which takes in a YAML file.
+  * Added new noun to fetch status called task. Task also has two subcommands, status and config.
 
  -- Renan DelValle <renanidelvalle@gmail.com>  Wed, 26 Dec 2018 15:10:00 -0700
 
