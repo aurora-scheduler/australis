@@ -1,0 +1,13 @@
+---
+environment: "prod"
+role: "vagrant"
+name: "hello_world"
+cpu: 0.09
+ram: 64
+disk: 128
+instances: 1
+thermos:
+  - name: "bootstrap"
+    cmd: "echo bootstrapping"
+  - name: "hello_gorealis"
+    cmd: "while true; do echo hello world from gorealis; sleep 10; done"
