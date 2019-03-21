@@ -2,6 +2,7 @@ module github.com/rdelval/australis
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/cpuguy83/go-md2man v1.0.10 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/paypal/gorealis/v2 v2.0.1
 	github.com/pkg/errors v0.0.0-20171216070316-e881fd58d78e

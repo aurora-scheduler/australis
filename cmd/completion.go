@@ -15,8 +15,8 @@ Copy australis.completion.sh into the correct folder and rename to australis
 In Linux, this directory is usually /etc/bash_completion.d/
 In MacOS this directory is $(brew --prefix)/etc/bash_completion.d if auto completion was install through brew.
 `,
-	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
-	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
+	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	Run: func(cmd *cobra.Command, args []string) {
 		rootCmd.GenBashCompletionFile(filename)
 	},
