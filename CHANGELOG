@@ -1,6 +1,8 @@
 0.0.8
 
 * Upgraded default timeouts and durations for sla-aware draining.
+* Added monitor verb along with hosts noun.
+* Fixed bug with monitor not using the correct default values for sla-aware drain policies.
 
 0.0.7
 
