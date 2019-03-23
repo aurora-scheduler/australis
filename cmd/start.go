@@ -58,7 +58,13 @@ are not allowed to schedule new tasks and any tasks already running on this Agen
 are killed and rescheduled in an Agent that is not in maintenance mode. Command
 expects a space separated list of hosts to place into maintenance mode.`,
 	Args: cobra.MinimumNArgs(1),
-	Run:  drain,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		// Manually initializing default values for this command as the default value for shared variables will
+		// be dependent on the order in which all commands were initialized
+		monitorTimeout = time.Minute * 10
+		monitorInterval = time.Second * 5
+	},
+	Run: drain,
 }
 
 var startSLADrainCmd = &cobra.Command{
@@ -76,7 +82,13 @@ var startSLACountDrainCmd = &cobra.Command{
 	Long: `Adds a Mesos Agent to Aurora's Drain list. Tasks will be drained using the count SLA policy as a fallback
 when a Job does not have a defined SLA policy.`,
 	Args: cobra.MinimumNArgs(1),
-	Run:  SLACountDrain,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		// Manually initializing default values for this command as the default value for shared variables will
+		// be dependent on the order in which all commands were initialized
+		monitorTimeout = time.Minute * 20
+		monitorInterval = time.Second * 10
+	},
+	Run: SLACountDrain,
 }
 
 var startSLAPercentageDrainCmd = &cobra.Command{
@@ -85,7 +97,13 @@ var startSLAPercentageDrainCmd = &cobra.Command{
 	Long: `Adds a Mesos Agent to Aurora's Drain list. Tasks will be drained using the percentage SLA policy as a fallback
 when a Job does not have a defined SLA policy.`,
 	Args: cobra.MinimumNArgs(1),
-	Run:  SLAPercentageDrain,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		// Manually initializing default values for this command as the default value for shared variables will
+		// be dependent on the order in which all commands were initialized
+		monitorTimeout = time.Minute * 20
+		monitorInterval = time.Second * 10
+	},
+	Run: SLAPercentageDrain,
 }
 
 var startMaintenanceCmd = &cobra.Command{
@@ -95,7 +113,13 @@ var startMaintenanceCmd = &cobra.Command{
 are de-prioritized for scheduling a task. Command
 expects a space separated list of hosts to place into maintenance mode.`,
 	Args: cobra.MinimumNArgs(1),
-	Run:  maintenance,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		// Manually initializing default values for this command as the default value for shared variables will
+		// be dependent on the order in which all commands were initialized
+		monitorTimeout = time.Minute * 1
+		monitorInterval = time.Second * 5
+	},
+	Run: maintenance,
 }
 
 func drain(cmd *cobra.Command, args []string) {

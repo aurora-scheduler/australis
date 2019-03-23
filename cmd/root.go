@@ -29,6 +29,7 @@ var count int64
 var filename string
 var message = new(string)
 var updateID string
+var statusList = make([]string, 0, 0)
 var log = logrus.New()
 
 const australisVer = "v0.0.8"
