@@ -31,9 +31,9 @@ var message = new(string)
 var updateID string
 var log = logrus.New()
 
-const australisVer = "v0.0.7"
+const australisVer = "v0.0.8"
 
-var monitorInterval, monitorTimeout time.Duration
+var monitorInterval, monitorTimeout, forceDrainTimeout time.Duration
 
 func init() {
 

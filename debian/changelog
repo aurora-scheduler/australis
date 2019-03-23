@@ -1,3 +1,10 @@
+australis (0.0.8) unstable; urgency=medium
+
+  * Upgraded default timeouts and durations for sla-aware draining.
+  * Added ability for controlling when an SLA-Aware drain sheds SLA awareness for SLA-aware drain policies
+
+ -- Renan DelValle <renanidelvalle@gmail.com>  Fri, 22 Mar 2019 15:10:00 -0700
+
 australis (0.0.7) unstable; urgency=medium
 
   * Upgraded australis to gorealis v2.

@@ -1,3 +1,7 @@
+0.0.8
+
+* Upgraded default timeouts and durations for sla-aware draining.
+
 0.0.7
 
 * Initial migration to gorealis v2
