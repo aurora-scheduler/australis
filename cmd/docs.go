@@ -11,7 +11,7 @@ func init() {
 
 var docsCmd = &cobra.Command{
 	Use:               "docs",
-	Short:             "Kill an Aurora Job",
+	Short:             "Generate documents in markdown format for Australis.",
 	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	Run: func(cmd *cobra.Command, args []string) {
