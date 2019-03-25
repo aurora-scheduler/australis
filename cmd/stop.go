@@ -7,13 +7,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var stopMaintenanceConfig = MonitorCmdConfig{}
+
 func init() {
 	rootCmd.AddCommand(stopCmd)
 
 	// Stop subcommands
-	stopCmd.AddCommand(stopMaintCmd)
-	stopMaintCmd.Flags().DurationVar(&monitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
-	stopMaintCmd.Flags().DurationVar(&monitorTimeout, "timeout", time.Minute*1, "Time after which the monitor will stop polling and throw an error.")
+	stopCmd.AddCommand(stopMaintCmd.cmd)
+	stopMaintCmd.cmd.Run = endMaintenance
+	stopMaintCmd.cmd.Flags().DurationVar(&stopMaintenanceConfig.monitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
+	stopMaintCmd.cmd.Flags().DurationVar(&stopMaintenanceConfig.monitorTimeout, "timeout", time.Minute*1, "Time after which the monitor will stop polling and throw an error.")
 
 	// Stop update
 
@@ -29,11 +32,12 @@ var stopCmd = &cobra.Command{
 	Short: "Stop a service or maintenance on a host (DRAIN).",
 }
 
-var stopMaintCmd = &cobra.Command{
-	Use:   "drain [space separated host list]",
-	Short: "Stop maintenance on a host (move to NONE).",
-	Long:  `Transition a list of hosts currently in a maintenance status out of it.`,
-	Run:   endMaintenance,
+var stopMaintCmd = MonitorCmdConfig{
+	cmd: &cobra.Command{
+		Use:   "drain [space separated host list]",
+		Short: "Stop maintenance on a host (move to NONE).",
+		Long:  `Transition a list of hosts currently in a maintenance status out of it.`,
+	},
 }
 
 var stopUpdateCmd = &cobra.Command{
@@ -57,8 +61,8 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 	hostResult, err := client.HostMaintenanceMonitor(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE},
-		monitorInterval,
-		monitorTimeout)
+		stopMaintenanceConfig.monitorInterval,
+		stopMaintenanceConfig.monitorTimeout)
 
 	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_NONE})
 

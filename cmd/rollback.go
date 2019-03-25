@@ -24,12 +24,12 @@ func init() {
 
 var rollbackCmd = &cobra.Command{
 	Use:   "rollback",
-	Short: "rollback an operation such as an Update",
+	Short: "Rollback an operation such as an Update",
 }
 
 var rollbackUpdateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "rollback an update that is currently paused",
+	Short: "Rollback an update",
 	Run:   rollbackUpdate,
 }
 

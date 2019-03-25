@@ -4,10 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
+
+type MonitorCmdConfig struct {
+	cmd *cobra.Command
+	monitorInterval, monitorTimeout time.Duration
+	statusList []string
+}
 
 func toJSON(v interface{}) string {
 

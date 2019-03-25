@@ -34,7 +34,7 @@ var log = logrus.New()
 
 const australisVer = "v0.0.8"
 
-var monitorInterval, monitorTimeout, forceDrainTimeout time.Duration
+var forceDrainTimeout time.Duration
 
 func init() {
 
