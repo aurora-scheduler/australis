@@ -7,6 +7,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(docsCmd)
+	docsCmd.Hidden = true
 }
 
 var docsCmd = &cobra.Command{

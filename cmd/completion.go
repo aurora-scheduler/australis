@@ -4,6 +4,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	rootCmd.AddCommand(completionCmd)
+
+	completionCmd.Hidden = true
+	completionCmd.Flags().StringVar(&filename, "filename", "australis.completion.sh", "Path and name of the autocompletion file.")
+}
+
 var completionCmd = &cobra.Command{
 	Use:   "autocomplete",
 	Short: "Create auto completion for bash.",
@@ -22,8 +29,3 @@ In MacOS this directory is $(brew --prefix)/etc/bash_completion.d if auto comple
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(completionCmd)
-
-	completionCmd.Flags().StringVar(&filename, "filename", "australis.completion.sh", "Path and name of the autocompletion file.")
-}
