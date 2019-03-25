@@ -28,7 +28,7 @@ func init() {
 	startSLACountDrainCmd.cmd.Flags().DurationVar(&startSLACountDrainCmd.monitorInterval, "interval", time.Second*10, "Interval at which to poll scheduler.")
 	startSLACountDrainCmd.cmd.Flags().DurationVar(&startSLACountDrainCmd.monitorTimeout, "timeout", time.Minute*20, "Time after which the monitor will stop polling and throw an error.")
 	startSLACountDrainCmd.cmd.Flags().Int64Var(&count, "count", 5, "Instances count that should be running to meet SLA.")
-	startSLACountDrainCmd.cmd.Flags().DurationVar(&duration, "duration", time.Second*45, "Minimum time duration a task needs to be `RUNNING` to be treated as active.")
+	startSLACountDrainCmd.cmd.Flags().DurationVar(&duration, "duration", time.Minute*1, "Minimum time duration a task needs to be `RUNNING` to be treated as active.")
 	startSLACountDrainCmd.cmd.Flags().DurationVar(&forceDrainTimeout, "sla-limit", time.Minute*60, "Time limit after which SLA-Aware drain sheds SLA Awareness.")
 
 	startSLADrainCmd.AddCommand(startSLAPercentageDrainCmd.cmd)
@@ -37,8 +37,8 @@ func init() {
 	// SLA Maintenance specific flags
 	startSLAPercentageDrainCmd.cmd.Flags().DurationVar(&startSLACountDrainCmd.monitorInterval, "interval", time.Second*10, "Interval at which to poll scheduler.")
 	startSLAPercentageDrainCmd.cmd.Flags().DurationVar(&startSLACountDrainCmd.monitorTimeout, "timeout", time.Minute*20, "Time after which the monitor will stop polling and throw an error.")
-	startSLAPercentageDrainCmd.cmd.Flags().Float64Var(&percent, "percent", 75.0, "Percentage of instances that should be running to meet SLA.")
-	startSLAPercentageDrainCmd.cmd.Flags().DurationVar(&duration, "duration", time.Second*45, "Minimum time duration a task needs to be `RUNNING` to be treated as active.")
+	startSLAPercentageDrainCmd.cmd.Flags().Float64Var(&percent, "percent", 80.0, "Percentage of instances that should be running to meet SLA.")
+	startSLAPercentageDrainCmd.cmd.Flags().DurationVar(&duration, "duration", time.Minute*1, "Minimum time duration a task needs to be `RUNNING` to be treated as active.")
 	startSLAPercentageDrainCmd.cmd.Flags().DurationVar(&forceDrainTimeout, "sla-limit", time.Minute*60, "Time limit after which SLA-Aware drain sheds SLA Awareness.")
 
 	startCmd.AddCommand(startMaintenanceCmd.cmd)
