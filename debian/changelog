@@ -1,3 +1,9 @@
+australis (0.0.9) unstable; urgency=medium
+
+  * Unreleased
+
+ -- Renan DelValle <renanidelvalle@gmail.com>  Fri, 25 Mar 2019 15:10:00 -0700
+
 australis (0.0.8) unstable; urgency=medium
 
   * Upgraded default timeouts and durations for sla-aware draining.

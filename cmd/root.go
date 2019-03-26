@@ -32,7 +32,7 @@ var updateID string
 var statusList = make([]string, 0, 0)
 var log = logrus.New()
 
-const australisVer = "v0.0.8"
+const australisVer = "v0.0.9"
 
 var forceDrainTimeout time.Duration
 
