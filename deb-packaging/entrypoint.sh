@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # Temporary fix for a go mods bug
 rm /australis/go.sum
 
