@@ -7,4 +7,4 @@ Homepage: https://github.com/rdelval/australis
 
 Package: australis
 Architecture: any
-Description: A gorealis based client for Apache Aurora
+Description: Gorealis based command line interface client for Apache Aurora
