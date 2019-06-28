@@ -68,7 +68,7 @@ var startCmd = &cobra.Command{
 	Short: "Start a service, maintenance on a host (DRAIN), a snapshot, or a backup.",
 }
 
-var startDrainCmd = MonitorCmdConfig{
+var startDrainCmd = monitorCmdConfig{
 	cmd: &cobra.Command{
 		Use:   "drain [space separated host list]",
 		Short: "Place a list of space separated Mesos Agents into draining mode.",
@@ -89,7 +89,7 @@ are killed and rescheduled in an Agent that is not in maintenance mode. Command
 expects a space separated list of hosts to place into maintenance mode.`,
 }
 
-var startSLACountDrainCmd = MonitorCmdConfig{
+var startSLACountDrainCmd = monitorCmdConfig{
 	cmd: &cobra.Command{
 		Use:   "count [space separated host list]",
 		Short: "Place a list of space separated Mesos Agents into maintenance mode using the count SLA aware policy as a fallback.",
@@ -99,7 +99,7 @@ when a Job does not have a defined SLA policy.`,
 	},
 }
 
-var startSLAPercentageDrainCmd = MonitorCmdConfig{
+var startSLAPercentageDrainCmd = monitorCmdConfig{
 	cmd: &cobra.Command{
 		Use:   "percentage [space separated host list]",
 		Short: "Place a list of space separated Mesos Agents into maintenance mode using the percentage SLA aware policy as a fallback.",
@@ -109,7 +109,7 @@ when a Job does not have a defined SLA policy.`,
 	},
 }
 
-var startMaintenanceCmd = MonitorCmdConfig{
+var startMaintenanceCmd = monitorCmdConfig{
 	cmd: &cobra.Command{
 		Use:   "maintenance [space separated host list]",
 		Short: "Place a list of space separated Mesos Agents into maintenance mode.",

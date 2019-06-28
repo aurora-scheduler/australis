@@ -38,7 +38,7 @@ var monitorCmd = &cobra.Command{
 	Short: "Watch for a specific state change",
 }
 
-var monitorHostCmd = MonitorCmdConfig{
+var monitorHostCmd = monitorCmdConfig{
 	cmd: &cobra.Command{
 		Use:   "hosts",
 		Short: "Watch a host maintenance status until it enters one of the desired statuses.",

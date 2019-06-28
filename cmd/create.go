@@ -164,13 +164,16 @@ func createJob(cmd *cobra.Command, args []string) {
 
 	if err := client.CreateJob(auroraJob); err != nil {
 		log.Fatal("unable to create Aurora job: ", err)
-	} else {
-		if ok, monitorErr := client.InstancesMonitor(auroraJob.JobKey(), auroraJob.GetInstanceCount(), 5, 50); !ok || monitorErr != nil {
-			if err := client.KillJob(auroraJob.JobKey()); err != nil {
-				log.Fatal(monitorErr, err)
-			}
-			log.Fatal(monitorErr)
+	}
+
+	if ok, monitorErr := client.InstancesMonitor(auroraJob.JobKey(),
+		auroraJob.GetInstanceCount(),
+		5,
+		50); !ok || monitorErr != nil {
+		if err := client.KillJob(auroraJob.JobKey()); err != nil {
+			log.Fatal(monitorErr, err)
 		}
+		log.Fatal(monitorErr)
 	}
 
 }

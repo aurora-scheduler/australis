@@ -25,10 +25,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type MonitorCmdConfig struct {
-	cmd *cobra.Command
+type monitorCmdConfig struct {
+	cmd                             *cobra.Command
 	monitorInterval, monitorTimeout time.Duration
-	statusList []string
+	statusList                      []string
 }
 
 func toJSON(v interface{}) string {

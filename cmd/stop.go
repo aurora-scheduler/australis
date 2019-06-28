@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var stopMaintenanceConfig = MonitorCmdConfig{}
+var stopMaintenanceConfig = monitorCmdConfig{}
 
 func init() {
 	rootCmd.AddCommand(stopCmd)
@@ -46,7 +46,7 @@ var stopCmd = &cobra.Command{
 	Short: "Stop a service or maintenance on a host (DRAIN).",
 }
 
-var stopMaintCmd = MonitorCmdConfig{
+var stopMaintCmd = monitorCmdConfig{
 	cmd: &cobra.Command{
 		Use:   "drain [space separated host list]",
 		Short: "Stop maintenance on a host (move to NONE).",
