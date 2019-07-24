@@ -1,5 +1,6 @@
 0.0.9 (unreleased)
 
+* Added ability to create jobs which contain an executorless docker container.
 
 0.0.8
 
