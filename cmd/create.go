@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	yaml "gopkg.in/yaml.v2"
 
@@ -51,6 +52,15 @@ type ThermosProcess struct {
 	Cmd  string `yaml:"cmd"`
 }
 
+type DockerContainer struct {
+	Name string `yaml:"name"`
+	Tag  string `yaml:"tag"`
+}
+
+type Container struct {
+	Docker *DockerContainer `yaml:"docker"`
+}
+
 type Job struct {
 	Environment string            `yaml:"environment"`
 	Role        string            `yaml:"role"`
@@ -63,7 +73,8 @@ type Job struct {
 	URIs        []URI             `yaml:"uris"`
 	Metadata    map[string]string `yaml:"labels"`
 	Service     bool              `yaml:"service"`
-	Thermos     []ThermosProcess  `yaml:",flow"`
+	Thermos     []ThermosProcess  `yaml:",flow,omitempty"`
+	Container   *Container        `yaml:"container,omitempty"`
 }
 
 func (j *Job) Validate() bool {
@@ -152,14 +163,26 @@ func createJob(cmd *cobra.Command, args []string) {
 			thermosExec.AddProcess(realis.NewThermosProcess(process.Name, process.Cmd))
 		}
 		auroraJob.ThermosExecutor(thermosExec)
-	} else {
+	} else if job.Executor.Name != "" {
 		// Non-Thermos executor
 		if job.Executor.Name == "" {
-			log.Fatal("no executor provided")
+			log.Fatal("no executor name provided")
 		}
 
 		auroraJob.ExecutorName(job.Executor.Name)
 		auroraJob.ExecutorData(job.Executor.Data)
+	} else if job.Container != nil {
+		if job.Container.Docker == nil {
+			log.Fatal("no container specified")
+		}
+
+		if job.Container.Docker.Tag != "" && !strings.ContainsRune(job.Container.Docker.Name, ':') {
+			job.Container.Docker.Name += ":" + job.Container.Docker.Tag
+		}
+		auroraJob.Container(realis.NewDockerContainer().Image(job.Container.Docker.Name))
+
+	} else {
+		log.Fatal("task does not contain a thermos definition, a custom executor name, or a container to launch")
 	}
 
 	if err := client.CreateJob(auroraJob); err != nil {

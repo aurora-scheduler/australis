@@ -1,0 +1,12 @@
+---
+environment: "prod"
+role: "vagrant"
+name: "cryptography"
+cpu: 2.00
+ram: 256 
+disk: 128
+instances: 1
+container:
+  docker:
+    name: "rdelvalle/phoronix"
+    tag: cryptography
