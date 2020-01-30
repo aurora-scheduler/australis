@@ -1,4 +1,4 @@
-0.0.9 (unreleased)
+0.0.9
 
 * Added ability to create jobs which contain an executorless docker container.
 * Sla-aware draining sub-command has been simplified. Instead of having a count/percentage
