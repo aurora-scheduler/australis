@@ -1,8 +1,11 @@
 australis (0.0.9) unstable; urgency=medium
 
-  * Unreleased
+  * added ability to create jobs which contain an executorless docker container.
+  * sla-aware draining sub-command has been simplified. instead of having a count/percentage
+    subcommand, it now has a flag for each of these options. the count and percentage flag are
+    mutually exclusive, and one of them has to be set.
 
- -- Renan DelValle <renanidelvalle@gmail.com>  Fri, 25 Mar 2019 15:10:00 -0700
+ -- Renan DelValle <renanidelvalle@gmail.com>  Wed, 29 Jan 2020 15:10:00 -0700
 
 australis (0.0.8) unstable; urgency=medium
 
