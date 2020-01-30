@@ -80,7 +80,9 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // TODO(rdelvalle): Move more from connect into this function
