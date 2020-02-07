@@ -37,7 +37,7 @@ var resumeJobUpdateCmd = &cobra.Command{
 
 func resumeJobUpdate(cmd *cobra.Command, args []string) {
 	err := client.ResumeJobUpdate(
-		&aurora.JobUpdateKey{
+		aurora.JobUpdateKey{
 			Job: &aurora.JobKey{Environment: *env, Role: *role, Name: *name},
 			ID:  updateID,
 		},

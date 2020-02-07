@@ -58,7 +58,7 @@ func killJob(cmd *cobra.Command, args []string) {
 		log.Fatalln(err)
 	}
 
-	if ok, err := client.InstancesMonitor(job.JobKey(), 0, 5, 50); !ok || err != nil {
+	if ok, err := client.MonitorInstances(job.JobKey(), 0, 5, 50); !ok || err != nil {
 		log.Fatalln("Unable to kill all instances of job")
 	}
 }
