@@ -1,5 +1,7 @@
 0.1.0 (unreleased)
 
+* Adding support for drain sub-command to take in JSON list from stdin or from a specified file.
+* Added flags `json-file` and `json` to drain, maintenance, and sla-drain.
 
 0.0.9
 
