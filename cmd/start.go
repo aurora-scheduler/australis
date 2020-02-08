@@ -15,7 +15,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/paypal/gorealis/v2/gen-go/apache/aurora"
@@ -123,10 +126,36 @@ func argsValidateJSONFlags(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+func hostList(cmd *cobra.Command, args []string) []string {
+	var hosts []string
+	if cmd.Flags().Changed(jsonFlag) {
+		err := json.NewDecoder(os.Stdin).Decode(&hosts)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else if cmd.Flags().Changed(jsonFileFlag) {
+		data, err := ioutil.ReadFile(fromJsonFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = json.Unmarshal(data, &hosts)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		hosts = args
+	}
+
+	return hosts
+}
+
 func drain(cmd *cobra.Command, args []string) {
+	hosts := hostList(cmd, args)
+
 	log.Infoln("Setting hosts to DRAINING")
-	log.Infoln(args)
-	result, err := client.DrainHosts(args...)
+	log.Infoln(hosts)
+	result, err := client.DrainHosts(hosts...)
 	if err != nil {
 		log.Fatalf("error: %+v", err)
 	}
@@ -136,7 +165,7 @@ func drain(cmd *cobra.Command, args []string) {
 	log.Infof("Monitoring for %v at %v intervals", monitorHostCmd.monitorTimeout, monitorHostCmd.monitorInterval)
 	// Monitor change to DRAINING and DRAINED mode
 	hostResult, err := client.MonitorHostMaintenance(
-		args,
+		hosts,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED},
 		startDrainCmd.monitorInterval,
 		startDrainCmd.monitorTimeout)
@@ -149,7 +178,6 @@ func drain(cmd *cobra.Command, args []string) {
 }
 
 func slaDrainHosts(policy *aurora.SlaPolicy, interval, timeout time.Duration, hosts ...string) {
-
 	result, err := client.SLADrainHosts(policy, int64(forceDrainTimeout.Seconds()), hosts...)
 	if err != nil {
 		log.Fatalf("error: %+v\n", err)
@@ -172,6 +200,8 @@ func slaDrainHosts(policy *aurora.SlaPolicy, interval, timeout time.Duration, ho
 	}
 }
 func slaDrain(cmd *cobra.Command, args []string) {
+	hosts := hostList(cmd, args)
+
 	// This check makes sure only a single flag is set.
 	// If they're both set or both not set, the statement will evaluate to true.
 	if cmd.Flags().Changed(percentageFlag) == cmd.Flags().Changed(countFlag) {
@@ -194,13 +224,15 @@ func slaDrain(cmd *cobra.Command, args []string) {
 	}
 
 	log.Infoln("Hosts affected: ", args)
-	slaDrainHosts(policy, startDrainCmd.monitorInterval, startDrainCmd.monitorTimeout, args...)
+	slaDrainHosts(policy, startDrainCmd.monitorInterval, startDrainCmd.monitorTimeout, hosts...)
 }
 
 func maintenance(cmd *cobra.Command, args []string) {
+	hosts := hostList(cmd, args)
+
 	log.Infoln("Setting hosts to Maintenance mode")
-	log.Infoln(args)
-	result, err := client.StartMaintenance(args...)
+	log.Infoln(hosts)
+	result, err := client.StartMaintenance(hosts...)
 	if err != nil {
 		log.Fatalf("error: %+v", err)
 	}
@@ -211,7 +243,7 @@ func maintenance(cmd *cobra.Command, args []string) {
 
 	// Monitor change to DRAINING and DRAINED mode
 	hostResult, err := client.MonitorHostMaintenance(
-		args,
+		hosts,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED},
 		startMaintenanceCmd.monitorInterval,
 		startMaintenanceCmd.monitorTimeout)
