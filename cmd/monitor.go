@@ -61,7 +61,7 @@ func monitorHost(cmd *cobra.Command, args []string) {
 	}
 
 	log.Infof("Monitoring for %v at %v intervals", monitorHostCmd.monitorTimeout, monitorHostCmd.monitorInterval)
-	hostResult, err := client.HostMaintenanceMonitor(args, maintenanceModes, monitorHostCmd.monitorInterval, monitorHostCmd.monitorTimeout)
+	hostResult, err := client.MonitorHostMaintenance(args, maintenanceModes, monitorHostCmd.monitorInterval, monitorHostCmd.monitorTimeout)
 
 	maintenanceMonitorPrint(hostResult, maintenanceModes)
 

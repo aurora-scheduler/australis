@@ -36,6 +36,8 @@ var caCertsPath string
 var clientKey, clientCert string
 var configFile string
 var toJson bool
+var fromJson bool
+var fromJsonFile string
 var logLevel string
 var duration time.Duration
 var percent float64
@@ -43,10 +45,9 @@ var count int64
 var filename string
 var message = new(string)
 var updateID string
-var statusList = make([]string, 0, 0)
 var log = logrus.New()
 
-const australisVer = "v0.0.10"
+const australisVer = "v0.1.0"
 
 var forceDrainTimeout time.Duration
 

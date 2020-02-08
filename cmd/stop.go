@@ -66,13 +66,13 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 	log.Println(args)
 	result, err := client.EndMaintenance(args...)
 	if err != nil {
-		log.Fatalf("error: %+v\n", err)
+		log.Fatalf("error: %+v", err)
 	}
 
 	log.Debugln(result)
 
 	// Monitor change to NONE mode
-	hostResult, err := client.HostMaintenanceMonitor(
+	hostResult, err := client.MonitorHostMaintenance(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE},
 		stopMaintenanceConfig.monitorInterval,

@@ -36,7 +36,7 @@ var pulseJobUpdateCmd = &cobra.Command{
 
 func pulseJobUpdate(cmd *cobra.Command, args []string) {
 	_, err := client.PulseJobUpdate(
-		&aurora.JobUpdateKey{
+		aurora.JobUpdateKey{
 			Job: &aurora.JobKey{Environment: *env, Role: *role, Name: *name},
 			ID:  updateID,
 		})
