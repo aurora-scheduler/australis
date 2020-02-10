@@ -47,7 +47,7 @@ var message = new(string)
 var updateID string
 var log = logrus.New()
 
-const australisVer = "v0.1.0"
+const australisVer = "v0.1.1"
 
 var forceDrainTimeout time.Duration
 

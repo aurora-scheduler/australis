@@ -1,3 +1,7 @@
+0.1.1
+
+* Unreleased
+
 0.1.0
 
 * Adding support for drain sub-command to take in JSON list from stdin or from a specified file.
