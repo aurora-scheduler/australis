@@ -6,3 +6,5 @@ debian/australis.substvars
 build/
 dist/
 .idea/
+
+go.sum
