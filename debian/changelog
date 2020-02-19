@@ -1,8 +1,10 @@
 australis (0.1.1) unstable; urgency=medium
 
-  * Unreleased
+  * Removed support for building with dep
+  * Upgraded depdencies to their latest versions.
+  * gorealis v2 now lives in the aurora-scheduler organization and dependencies have been updated to reflect that.
 
- -- Renan DelValle <renanidelvalle@gmail.com>  Mon, 10 Feb 2020 12:00:00 -0700
+ -- Renan DelValle <renanidelvalle@gmail.com>  Mon, 19 Feb 2020 12:00:00 -0700
 
 australis (0.1.0) unstable; urgency=medium
 

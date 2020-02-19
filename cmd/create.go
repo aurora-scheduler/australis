@@ -20,7 +20,7 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 
-	realis "github.com/paypal/gorealis/v2"
+	realis "github.com/aurora-scheduler/gorealis/v2"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

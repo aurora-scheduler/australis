@@ -15,7 +15,7 @@
 package main
 
 import (
-	"github.com/rdelval/australis/cmd"
+	"github.com/aurora-scheduler/australis/cmd"
 )
 
 func main() {

@@ -1,12 +1,12 @@
 # Australis
 
-A light-weight client for [Apache Aurora](https://aurora.apache.org/) built using [gorealis](https://github.com/paypal/gorealis).
+A light-weight client for [Aurora Scheduler](https://aurora-scheduler.github.io/) built using [gorealis](https://github.com/aurora-scheduler/gorealis).
 
 ## Usage
 See the [documentation](docs/australis.md) for more information.
 
 ## Status
-Australis is a work in progress and does not support all the features of Apache Aurora.
+Australis is a work in progress and does not support all the features of Aurora Scheduler.
 
 ### Build locally
 This project uses go mods. To build locally run:

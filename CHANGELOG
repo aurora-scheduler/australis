@@ -1,6 +1,8 @@
-0.1.1
+0.1.1 (unreleased)
 
-* Unreleased
+* Removed support for building with dep
+* Upgraded depdencies to their latest versions.
+* gorealis v2 now lives in the aurora-scheduler organization and dependencies have been updated to reflect that.
 
 0.1.0
 

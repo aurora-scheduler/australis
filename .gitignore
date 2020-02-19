@@ -6,3 +6,8 @@ debian/australis.substvars
 build/
 dist/
 .idea/
+
+# Use checksum database
+go.sum
+
+.DS_Store
