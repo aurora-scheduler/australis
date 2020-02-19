@@ -20,7 +20,7 @@ import (
 
 	"github.com/spf13/viper"
 
-	realis "github.com/paypal/gorealis/v2"
+	realis "github.com/aurora-scheduler/gorealis/v2"
 	"github.com/spf13/cobra"
 
 	"github.com/sirupsen/logrus"
