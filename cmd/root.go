@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aurora-scheduler/australis/internal"
 	"github.com/spf13/viper"
 
 	realis "github.com/aurora-scheduler/gorealis/v2"
@@ -47,7 +48,7 @@ var message = new(string)
 var updateID string
 var log = logrus.New()
 
-const australisVer = "v0.1.1"
+const australisVer = "v0.22.0"
 
 var forceDrainTimeout time.Duration
 
@@ -65,7 +66,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&skipCertVerification, "skipCertVerification", "i", false, "Skip CA certificate hostname verification.")
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "/etc/aurora/australis.yml", "Config file to use.")
 	rootCmd.PersistentFlags().BoolVar(&toJson, "toJSON", false, "Print output in JSON format.")
-	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info", "Set logging level ["+getLoggingLevels()+"].")
+	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info", "Set logging level ["+internal.GetLoggingLevels()+"].")
 }
 
 var rootCmd = &cobra.Command{
@@ -91,10 +92,11 @@ func setConfig(cmd *cobra.Command, args []string) {
 	lvl, err := logrus.ParseLevel(logLevel)
 
 	if err != nil {
-		log.Fatalf("Log level %v is not valid\n", logLevel)
+		log.Fatalf("Log level %v is not valid", logLevel)
 	}
 
 	log.SetLevel(lvl)
+	internal.Logger(log)
 }
 
 func connect(cmd *cobra.Command, args []string) {

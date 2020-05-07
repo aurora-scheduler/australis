@@ -69,7 +69,7 @@ func backup(cmd *cobra.Command, args []string) {
 	fmt.Println("Forcing scheduler to write a Backup of latest Snapshot to file system")
 	err := client.PerformBackup()
 	if err != nil {
-		log.Fatalf("error: %+v\n", err)
+		log.Fatalf("error: %+v", err)
 	} else {
 		log.Println("Backup started successfully")
 	}
@@ -112,7 +112,7 @@ func explicitRecon(cmd *cobra.Command, args []string) {
 		// Get batch size from args and convert it to the right format
 		batchInt, err := strconv.Atoi(args[0])
 		if err != nil {
-			log.Fatalf("error: %+v\n", err)
+			log.Fatalf("error: %v", err)
 		}
 
 		batchInt32 := int32(batchInt)
@@ -123,7 +123,7 @@ func explicitRecon(cmd *cobra.Command, args []string) {
 
 	err := client.ForceExplicitTaskReconciliation(batchSize)
 	if err != nil {
-		log.Fatalf("error: %+v\n", err.Error())
+		log.Fatalf("error: %v", err)
 	} else {
 		fmt.Println("Explicit reconciliation started successfully")
 	}
@@ -142,7 +142,7 @@ func implicitRecon(cmd *cobra.Command, args []string) {
 	log.Println("Forcing scheduler to perform an implicit reconciliation with Mesos")
 	err := client.ForceImplicitTaskReconciliation()
 	if err != nil {
-		log.Fatalf("error: %+v\n", err)
+		log.Fatalf("error: %+v", err)
 	} else {
 		fmt.Println("Implicit reconciliation started successfully")
 	}

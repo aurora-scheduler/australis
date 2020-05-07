@@ -21,6 +21,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/aurora-scheduler/australis/internal"
 	"github.com/aurora-scheduler/gorealis/v2/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
 )
@@ -34,46 +35,52 @@ func init() {
 	rootCmd.AddCommand(startCmd)
 
 	// Sub-commands
-	startCmd.AddCommand(startDrainCmd.cmd)
-	startDrainCmd.cmd.Run = drain
+	startCmd.AddCommand(startDrainCmd.Cmd)
+	startDrainCmd.Cmd.Run = drain
 
 	// Maintenance specific flags
-	startDrainCmd.cmd.Flags().DurationVar(&startDrainCmd.monitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
-	startDrainCmd.cmd.Flags().DurationVar(&startDrainCmd.monitorTimeout, "timeout", time.Minute*10, "Time after which the monitor will stop polling and throw an error.")
-	startDrainCmd.cmd.Flags().StringVar(&fromJsonFile, jsonFileFlag, "", "JSON file to read list of agents from.")
-	startDrainCmd.cmd.Flags().BoolVar(&fromJson, jsonFlag, false, "Read JSON list of agents from the STDIN.")
+	startDrainCmd.Cmd.Flags().DurationVar(&startDrainCmd.MonitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
+	startDrainCmd.Cmd.Flags().DurationVar(&startDrainCmd.MonitorTimeout, "timeout", time.Minute*10, "Time after which the monitor will stop polling and throw an error.")
+	startDrainCmd.Cmd.Flags().StringVar(&fromJsonFile, jsonFileFlag, "", "JSON file to read list of agents from.")
+	startDrainCmd.Cmd.Flags().BoolVar(&fromJson, jsonFlag, false, "Read JSON list of agents from the STDIN.")
 
 	/* SLA Aware commands */
-	startCmd.AddCommand(startSLADrainCmd.cmd)
-	startSLADrainCmd.cmd.Run = slaDrain
+	startCmd.AddCommand(startSLADrainCmd.Cmd)
+	startSLADrainCmd.Cmd.Run = slaDrain
 
 	// SLA Maintenance specific flags
-	startSLADrainCmd.cmd.Flags().Int64Var(&count, countFlag, 5, "Instances count that should be running to meet SLA.")
-	startSLADrainCmd.cmd.Flags().Float64Var(&percent, percentageFlag, 80.0, "Percentage of instances that should be running to meet SLA.")
-	startSLADrainCmd.cmd.Flags().DurationVar(&duration, "duration", time.Minute*1, "Minimum time duration a task needs to be `RUNNING` to be treated as active.")
-	startSLADrainCmd.cmd.Flags().DurationVar(&forceDrainTimeout, "sla-limit", time.Minute*60, "Time limit after which SLA-Aware drain sheds SLA Awareness.")
-	startSLADrainCmd.cmd.Flags().DurationVar(&startSLADrainCmd.monitorInterval, "interval", time.Second*10, "Interval at which to poll scheduler.")
-	startSLADrainCmd.cmd.Flags().DurationVar(&startSLADrainCmd.monitorTimeout, "timeout", time.Minute*20, "Time after which the monitor will stop polling and throw an error.")
-	startSLADrainCmd.cmd.Flags().StringVar(&fromJsonFile, jsonFileFlag, "", "JSON file to read list of agents from.")
-	startSLADrainCmd.cmd.Flags().BoolVar(&fromJson, jsonFlag, false, "Read JSON list of agents from the STDIN.")
+	startSLADrainCmd.Cmd.Flags().Int64Var(&count, countFlag, 5, "Instances count that should be running to meet SLA.")
+	startSLADrainCmd.Cmd.Flags().Float64Var(&percent, percentageFlag, 80.0, "Percentage of instances that should be running to meet SLA.")
+	startSLADrainCmd.Cmd.Flags().DurationVar(&duration, "duration", time.Minute*1, "Minimum time duration a task needs to be `RUNNING` to be treated as active.")
+	startSLADrainCmd.Cmd.Flags().DurationVar(&forceDrainTimeout, "sla-limit", time.Minute*60, "Time limit after which SLA-Aware drain sheds SLA Awareness.")
+	startSLADrainCmd.Cmd.Flags().DurationVar(&startSLADrainCmd.MonitorInterval, "interval", time.Second*10, "Interval at which to poll scheduler.")
+	startSLADrainCmd.Cmd.Flags().DurationVar(&startSLADrainCmd.MonitorTimeout, "timeout", time.Minute*20, "Time after which the monitor will stop polling and throw an error.")
+	startSLADrainCmd.Cmd.Flags().StringVar(&fromJsonFile, jsonFileFlag, "", "JSON file to read list of agents from.")
+	startSLADrainCmd.Cmd.Flags().BoolVar(&fromJson, jsonFlag, false, "Read JSON list of agents from the STDIN.")
 
-	startCmd.AddCommand(startMaintenanceCmd.cmd)
-	startMaintenanceCmd.cmd.Run = maintenance
+	startCmd.AddCommand(startMaintenanceCmd.Cmd)
+	startMaintenanceCmd.Cmd.Run = maintenance
 
 	// SLA Maintenance specific flags
-	startMaintenanceCmd.cmd.Flags().DurationVar(&startMaintenanceCmd.monitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
-	startMaintenanceCmd.cmd.Flags().DurationVar(&startMaintenanceCmd.monitorTimeout, "timeout", time.Minute*10, "Time after which the monitor will stop polling and throw an error.")
-	startMaintenanceCmd.cmd.Flags().StringVar(&fromJsonFile, jsonFileFlag, "", "JSON file to read list of agents from.")
-	startMaintenanceCmd.cmd.Flags().BoolVar(&fromJson, jsonFlag, false, "Read JSON list of agents from the STDIN.")
+	startMaintenanceCmd.Cmd.Flags().DurationVar(&startMaintenanceCmd.MonitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
+	startMaintenanceCmd.Cmd.Flags().DurationVar(&startMaintenanceCmd.MonitorTimeout, "timeout", time.Minute*10, "Time after which the monitor will stop polling and throw an error.")
+	startMaintenanceCmd.Cmd.Flags().StringVar(&fromJsonFile, jsonFileFlag, "", "JSON file to read list of agents from.")
+	startMaintenanceCmd.Cmd.Flags().BoolVar(&fromJson, jsonFlag, false, "Read JSON list of agents from the STDIN.")
+
+	// Start update command
+	startCmd.AddCommand(startUpdateCmd.Cmd)
+	startUpdateCmd.Cmd.Run = update
+	startUpdateCmd.Cmd.Flags().DurationVar(&startUpdateCmd.MonitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
+	startUpdateCmd.Cmd.Flags().DurationVar(&startUpdateCmd.MonitorTimeout, "timeout", time.Minute*10, "Time after which the monitor will stop polling and throw an error.")
 }
 
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start a service, maintenance on a host (DRAIN), a snapshot, or a backup.",
+	Short: "Start a service, maintenance on a host (DRAIN), a snapshot, an update, or a backup.",
 }
 
-var startDrainCmd = monitorCmdConfig{
-	cmd: &cobra.Command{
+var startDrainCmd = internal.MonitorCmdConfig{
+	Cmd: &cobra.Command{
 		Use:   "drain [space separated host list or use JSON flags]",
 		Short: "Place a list of space separated Mesos Agents into draining mode.",
 		Long: `Adds a Mesos Agent to Aurora's Drain list. Agents in this list
@@ -84,8 +91,8 @@ expects a space separated list of hosts to place into maintenance mode.`,
 	},
 }
 
-var startSLADrainCmd = monitorCmdConfig{
-	cmd: &cobra.Command{
+var startSLADrainCmd = internal.MonitorCmdConfig{
+	Cmd: &cobra.Command{
 		Use:   "sla-drain [space separated host list or use JSON flags]",
 		Short: "Place a list of space separated Mesos Agents into maintenance mode using SLA aware strategies.",
 		Long: `Adds a Mesos Agent to Aurora's Drain list. Agents in this list
@@ -100,14 +107,24 @@ when a Job does not have a defined SLA policy.`,
 	},
 }
 
-var startMaintenanceCmd = monitorCmdConfig{
-	cmd: &cobra.Command{
+var startMaintenanceCmd = internal.MonitorCmdConfig{
+	Cmd: &cobra.Command{
 		Use:   "maintenance [space separated host list or use JSON flags]",
 		Short: "Place a list of space separated Mesos Agents into maintenance mode.",
 		Long: `Places Mesos Agent into Maintenance mode. Agents in this list
 are de-prioritized for scheduling a task. Command
 expects a space separated list of hosts to place into maintenance mode.`,
 		Args: argsValidateJSONFlags,
+	},
+}
+
+var startUpdateCmd = internal.MonitorCmdConfig{
+	Cmd: &cobra.Command{
+		Use:   "update [update config]",
+		Short: "Start an update on an Aurora long running service.",
+		Long: `Starts the update process on an Aurora long running service. If no such service exists, the update mechanism
+will act as a deployment, creating all new instances based on the requirements in the update configuration.`,
+		Args: cobra.ExactArgs(1),
 	},
 }
 
@@ -162,15 +179,15 @@ func drain(cmd *cobra.Command, args []string) {
 
 	log.Debugln(result)
 
-	log.Infof("Monitoring for %v at %v intervals", monitorHostCmd.monitorTimeout, monitorHostCmd.monitorInterval)
+	log.Infof("Monitoring for %v at %v intervals", monitorHostCmd.MonitorTimeout, monitorHostCmd.MonitorInterval)
 	// Monitor change to DRAINING and DRAINED mode
 	hostResult, err := client.MonitorHostMaintenance(
 		hosts,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED},
-		startDrainCmd.monitorInterval,
-		startDrainCmd.monitorTimeout)
+		startDrainCmd.MonitorInterval,
+		startDrainCmd.MonitorTimeout)
 
-	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED})
+	internal.MaintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED}, toJson)
 
 	if err != nil {
 		log.Fatalln(err)
@@ -180,7 +197,7 @@ func drain(cmd *cobra.Command, args []string) {
 func slaDrainHosts(policy *aurora.SlaPolicy, interval, timeout time.Duration, hosts ...string) {
 	result, err := client.SLADrainHosts(policy, int64(forceDrainTimeout.Seconds()), hosts...)
 	if err != nil {
-		log.Fatalf("error: %+v\n", err)
+		log.Fatalf("error: %+v", err)
 	}
 
 	log.Debugln(result)
@@ -193,7 +210,7 @@ func slaDrainHosts(policy *aurora.SlaPolicy, interval, timeout time.Duration, ho
 		interval,
 		timeout)
 
-	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED})
+	internal.MaintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_DRAINED}, toJson)
 
 	if err != nil {
 		log.Fatalf("error: %+v", err)
@@ -224,7 +241,7 @@ func slaDrain(cmd *cobra.Command, args []string) {
 	}
 
 	log.Infoln("Hosts affected: ", args)
-	slaDrainHosts(policy, startDrainCmd.monitorInterval, startDrainCmd.monitorTimeout, hosts...)
+	slaDrainHosts(policy, startDrainCmd.MonitorInterval, startDrainCmd.MonitorTimeout, hosts...)
 }
 
 func maintenance(cmd *cobra.Command, args []string) {
@@ -239,18 +256,22 @@ func maintenance(cmd *cobra.Command, args []string) {
 
 	log.Debugln(result)
 
-	log.Infof("Monitoring for %v at %v intervals", monitorHostCmd.monitorTimeout, monitorHostCmd.monitorInterval)
+	log.Infof("Monitoring for %v at %v intervals", monitorHostCmd.MonitorTimeout, monitorHostCmd.MonitorInterval)
 
 	// Monitor change to DRAINING and DRAINED mode
 	hostResult, err := client.MonitorHostMaintenance(
 		hosts,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED},
-		startMaintenanceCmd.monitorInterval,
-		startMaintenanceCmd.monitorTimeout)
+		startMaintenanceCmd.MonitorInterval,
+		startMaintenanceCmd.MonitorTimeout)
 
-	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED})
+	internal.MaintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_SCHEDULED}, toJson)
 
 	if err != nil {
-		log.Fatalln("error: %+v", err)
+		log.Fatalf("error: %+v", err)
 	}
+}
+
+func update(cmd *cobra.Command, args []string) {
+
 }

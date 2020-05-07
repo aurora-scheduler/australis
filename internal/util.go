@@ -27,15 +27,21 @@ import (
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v2"
 )
-
 type MonitorCmdConfig struct {
-	cmd                             *cobra.Command
-	monitorInterval, monitorTimeout time.Duration
-	statusList                      []string
+	Cmd                             *cobra.Command
+	MonitorInterval, MonitorTimeout time.Duration
+	StatusList                      []string
 }
 
-func toJSON(v interface{}) string {
+var log *logrus.Logger
 
+// Logger sets the logger available to the internal package
+func Logger(l *logrus.Logger) {
+	log = l
+}
+
+// ToJSON converts an interface to a JSON formatted string
+func ToJSON(v interface{}) string {
 	output, err := json.Marshal(v)
 
 	if err != nil {
@@ -45,8 +51,7 @@ func toJSON(v interface{}) string {
 	return string(output)
 }
 
-func getLoggingLevels() string {
-
+func GetLoggingLevels() string {
 	var buffer bytes.Buffer
 
 	for _, level := range logrus.AllLevels {
@@ -57,16 +62,15 @@ func getLoggingLevels() string {
 	buffer.Truncate(buffer.Len() - 1)
 
 	return buffer.String()
-
 }
 
-func maintenanceMonitorPrint(hostResult map[string]bool, desiredStates []aurora.MaintenanceMode) {
+func MaintenanceMonitorPrint(hostResult map[string]bool, desiredStates []aurora.MaintenanceMode, toJson bool) {
 	if len(hostResult) > 0 {
 		// Create anonymous struct for JSON formatting
 		output := struct {
-			DesiredStates   []string `json:desired_states`
-			Transitioned    []string `json:transitioned`
-			NonTransitioned []string `json:non-transitioned`
+			DesiredStates   []string `json:"desired_states"`
+			Transitioned    []string `json:"transitioned"`
+			NonTransitioned []string `json:"non-transitioned"`
 		}{
 			make([]string, 0),
 			make([]string, 0),
@@ -86,7 +90,7 @@ func maintenanceMonitorPrint(hostResult map[string]bool, desiredStates []aurora.
 		}
 
 		if toJson {
-			fmt.Println(toJSON(output))
+			fmt.Println(ToJSON(output))
 		} else {
 			fmt.Printf("Entered %v status: %v\n", output.DesiredStates, output.Transitioned)
 			fmt.Printf("Did not enter %v status: %v\n", output.DesiredStates, output.NonTransitioned)

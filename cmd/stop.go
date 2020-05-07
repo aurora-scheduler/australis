@@ -17,20 +17,19 @@ package cmd
 import (
 	"time"
 
+	"github.com/aurora-scheduler/australis/internal"
 	"github.com/aurora-scheduler/gorealis/v2/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
 )
-
-var stopMaintenanceConfig = monitorCmdConfig{}
 
 func init() {
 	rootCmd.AddCommand(stopCmd)
 
 	// Stop subcommands
-	stopCmd.AddCommand(stopMaintCmd.cmd)
-	stopMaintCmd.cmd.Run = endMaintenance
-	stopMaintCmd.cmd.Flags().DurationVar(&stopMaintenanceConfig.monitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
-	stopMaintCmd.cmd.Flags().DurationVar(&stopMaintenanceConfig.monitorTimeout, "timeout", time.Minute*1, "Time after which the monitor will stop polling and throw an error.")
+	stopCmd.AddCommand(stopMaintCmd.Cmd)
+	stopMaintCmd.Cmd.Run = endMaintenance
+	stopMaintCmd.Cmd.Flags().DurationVar(&stopMaintCmd.MonitorInterval, "interval", time.Second*5, "Interval at which to poll scheduler.")
+	stopMaintCmd.Cmd.Flags().DurationVar(&stopMaintCmd.MonitorTimeout, "timeout", time.Minute*1, "Time after which the monitor will stop polling and throw an error.")
 
 	// Stop update
 
@@ -46,8 +45,8 @@ var stopCmd = &cobra.Command{
 	Short: "Stop a service or maintenance on a host (DRAIN).",
 }
 
-var stopMaintCmd = monitorCmdConfig{
-	cmd: &cobra.Command{
+var stopMaintCmd = internal.MonitorCmdConfig{
+	Cmd: &cobra.Command{
 		Use:   "drain [space separated host list]",
 		Short: "Stop maintenance on a host (move to NONE).",
 		Long:  `Transition a list of hosts currently in a maintenance status out of it.`,
@@ -75,13 +74,13 @@ func endMaintenance(cmd *cobra.Command, args []string) {
 	hostResult, err := client.MonitorHostMaintenance(
 		args,
 		[]aurora.MaintenanceMode{aurora.MaintenanceMode_NONE},
-		stopMaintenanceConfig.monitorInterval,
-		stopMaintenanceConfig.monitorTimeout)
+		stopMaintCmd.MonitorInterval,
+		stopMaintCmd.MonitorTimeout)
 
-	maintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_NONE})
+	internal.MaintenanceMonitorPrint(hostResult, []aurora.MaintenanceMode{aurora.MaintenanceMode_NONE}, toJson)
 
 	if err != nil {
-		log.Fatalln("error: %+v", err)
+		log.Fatalf("error: %+v", err)
 	}
 }
 

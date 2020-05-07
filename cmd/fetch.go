@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/aurora-scheduler/australis/internal"
 	realis "github.com/aurora-scheduler/gorealis/v2"
 	"github.com/aurora-scheduler/gorealis/v2/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
@@ -95,8 +96,8 @@ var taskStatusCmd = &cobra.Command{
 
 var leaderCmd = &cobra.Command{
 	Use:               "leader [zkNode0, zkNode1, ...zkNodeN]",
-	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
-	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, //We don't need a realis client for this cmd
+	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	PreRun:            setConfig,
 	Args:              cobra.MinimumNArgs(1),
 	Short:             "Fetch current Aurora leader given Zookeeper nodes. ",
@@ -138,11 +139,11 @@ func fetchTasksConfig(cmd *cobra.Command, args []string) {
 
 	tasks, err := client.GetTasksWithoutConfigs(taskQuery)
 	if err != nil {
-		log.Fatalf("error: %+v\n", err)
+		log.Fatalf("error: %+v", err)
 	}
 
 	if toJson {
-		fmt.Println(toJSON(tasks))
+		fmt.Println(internal.ToJSON(tasks))
 	} else {
 		for _, t := range tasks {
 			fmt.Println(t)
@@ -164,7 +165,7 @@ func fetchTasksStatus(cmd *cobra.Command, args []string) {
 	if *role == "" {
 		role = nil
 	}
-	//TODO: Add filtering down by status
+	// TODO(rdelvalle): Add filtering down by status
 	taskQuery := &aurora.TaskQuery{
 		Environment: env,
 		Role:        role,
@@ -173,11 +174,11 @@ func fetchTasksStatus(cmd *cobra.Command, args []string) {
 
 	tasks, err := client.GetTaskStatus(taskQuery)
 	if err != nil {
-		log.Fatalf("error: %+v\n", err)
+		log.Fatalf("error: %+v", err)
 	}
 
 	if toJson {
-		fmt.Println(toJSON(tasks))
+		fmt.Println(internal.ToJSON(tasks))
 	} else {
 		for _, t := range tasks {
 			fmt.Println(t)
@@ -193,7 +194,7 @@ func fetchHostStatus(cmd *cobra.Command, args []string) {
 	}
 
 	if toJson {
-		fmt.Println(toJSON(result.Statuses))
+		fmt.Println(internal.ToJSON(result.Statuses))
 	} else {
 		for _, k := range result.GetStatuses() {
 			fmt.Printf("Result: %s:%s\n", k.Host, k.Mode)
@@ -233,7 +234,7 @@ func fetchJobs(cmd *cobra.Command, args []string) {
 	result, err := client.GetJobs(*role)
 
 	if err != nil {
-		log.Fatalf("error: %+v\n", err)
+		log.Fatalf("error: %+v", err)
 	}
 
 	if toJson {
@@ -243,7 +244,7 @@ func fetchJobs(cmd *cobra.Command, args []string) {
 			configSlice = append(configSlice, config)
 		}
 
-		fmt.Println(toJSON(configSlice))
+		fmt.Println(internal.ToJSON(configSlice))
 	} else {
 		for jobConfig := range result.GetConfigs() {
 			fmt.Println(jobConfig)
