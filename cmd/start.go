@@ -230,7 +230,7 @@ func slaDrain(cmd *cobra.Command, args []string) {
 	if cmd.Flags().Changed(percentageFlag) {
 		log.Infoln("Setting hosts to DRAINING with the Percentage SLA policy.")
 		policy.PercentageSlaPolicy = &aurora.PercentageSlaPolicy{
-			Percentage: percent,
+			Percentage:   percent,
 			DurationSecs: int64(duration.Seconds()),
 		}
 	}
@@ -273,5 +273,25 @@ func maintenance(cmd *cobra.Command, args []string) {
 }
 
 func update(cmd *cobra.Command, args []string) {
+	updateJob, err := internal.UnmarshalUpdate(args[0])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	update, err := updateJob.ToRealis()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := client.StartJobUpdate(update, "")
+	if err != nil {
+		log.Fatalf("Update failed to start %v", err)
+	}
+
+	if ok, monitorErr := client.MonitorJobUpdate(*result.GetKey(),
+		startUpdateCmd.MonitorInterval,
+		startUpdateCmd.MonitorTimeout); !ok || monitorErr != nil {
+		log.Fatal("update did not ROLL FORWARD before monitor timed out")
+	}
 
 }

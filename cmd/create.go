@@ -15,10 +15,7 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/aurora-scheduler/australis/internal"
-	realis "github.com/aurora-scheduler/gorealis/v2"
 	"github.com/spf13/cobra"
 )
 
@@ -34,60 +31,15 @@ var createCmd = &cobra.Command{
 }
 
 func createJob(cmd *cobra.Command, args []string) {
-
 	job, err := internal.UnmarshalJob(args[0])
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	auroraJob := realis.NewJob().
-		Environment(job.Environment).
-		Role(job.Role).
-		Name(job.Name).
-		CPU(job.CPU).
-		RAM(job.RAM).
-		Disk(job.Disk).
-		IsService(job.Service).
-		InstanceCount(job.Instances)
-
-	// Adding URIs.
-	for _, uri := range job.URIs {
-		auroraJob.AddURIs(uri.Extract, uri.Cache, uri.URI)
-	}
-
-	// Adding Metadata.
-	for key, value := range job.Metadata {
-		auroraJob.AddLabel(key, value)
-	}
-
-	// If thermos jobs processes are provided, use them
-	if len(job.Thermos) > 0 {
-		thermosExec := realis.ThermosExecutor{}
-		for _, process := range job.Thermos {
-			thermosExec.AddProcess(realis.NewThermosProcess(process.Name, process.Cmd))
-		}
-		auroraJob.ThermosExecutor(thermosExec)
-	} else if job.Executor.Name != "" {
-		// Non-Thermos executor
-		if job.Executor.Name == "" {
-			log.Fatal("no executor name provided")
-		}
-
-		auroraJob.ExecutorName(job.Executor.Name)
-		auroraJob.ExecutorData(job.Executor.Data)
-	} else if job.Container != nil {
-		if job.Container.Docker == nil {
-			log.Fatal("no container specified")
-		}
-
-		if job.Container.Docker.Tag != "" && !strings.ContainsRune(job.Container.Docker.Name, ':') {
-			job.Container.Docker.Name += ":" + job.Container.Docker.Tag
-		}
-		auroraJob.Container(realis.NewDockerContainer().Image(job.Container.Docker.Name))
-
-	} else {
-		log.Fatal("task does not contain a thermos definition, a custom executor name, or a container to launch")
+	auroraJob, err := job.ToRealis()
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	if err := client.CreateJob(auroraJob); err != nil {

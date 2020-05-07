@@ -27,6 +27,7 @@ import (
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v2"
 )
+
 type MonitorCmdConfig struct {
 	Cmd                             *cobra.Command
 	MonitorInterval, MonitorTimeout time.Duration
@@ -109,44 +110,47 @@ func UnmarshalJob(filename string) (Job, error) {
 			return job, errors.Wrap(err, "unable to parse job config file")
 		}
 
-		if !job.Validate() {
-			return job, errors.New("invalid job config")
+		if err := job.Validate(); err != nil {
+			return job, fmt.Errorf("invalid job config %w", err)
 		}
 	}
 
 	return job, nil
 }
 
-func (j *Job) Validate() bool {
+func (j *Job) Validate() error {
 	if j.Name == "" {
-		return false
+		return errors.New("job name not specified")
 	}
 
 	if j.Role == "" {
-		return false
+		return errors.New("job role not specified")
 	}
 
 	if j.Environment == "" {
-		return false
+		return errors.New("job environment not specified")
 	}
 
 	if j.Instances <= 0 {
-		return false
+		return errors.New("number of instances in job cannot be less than or equal to 0")
 	}
 
 	if j.CPU <= 0.0 {
-		return false
+		return errors.New("CPU must be greater than 0")
 	}
 
 	if j.RAM <= 0 {
-		return false
+		return errors.New("RAM must be greater than 0")
 	}
 
 	if j.Disk <= 0 {
-		return false
+		return errors.New("Disk must be greater than 0")
 	}
 
-	return true
+	if len(j.Thermos) == 0 && j.Executor.Name == "" && j.Container == nil {
+		return errors.New("task does not contain a thermos definition, a custom executor name, or a container to launch")
+	}
+	return nil
 }
 
 func UnmarshalUpdate(filename string) (UpdateJob, error) {
@@ -160,11 +164,11 @@ func UnmarshalUpdate(filename string) (UpdateJob, error) {
 			return updateJob, errors.Wrap(err, "unable to parse job config file")
 		}
 
-		if !updateJob.JobConfig.Validate() {
-			return updateJob, errors.New("invalid job config")
+		if err := updateJob.JobConfig.Validate(); err != nil {
+			return updateJob, fmt.Errorf("invalid job config %w", err)
 		}
 		if err := updateJob.UpdateSettings.Validate(); err != nil {
-			return updateJob, errors.Wrap(err, "invalid update configuration")
+			return updateJob, fmt.Errorf("invalid update configuration %w", err)
 		}
 	}
 
@@ -172,6 +176,10 @@ func UnmarshalUpdate(filename string) (UpdateJob, error) {
 }
 
 func (u *UpdateSettings) Validate() error {
+	if u.InstanceCount <= 0 {
+		return errors.New("instance count must be larger than 0")
+	}
+
 	if u.Strategy.VariableBatch != nil {
 		if len(u.Strategy.VariableBatch.GroupSizes) == 0 {
 			return errors.New("variable batch strategy must specify at least one batch size")
@@ -191,7 +199,6 @@ func (u *UpdateSettings) Validate() error {
 		}
 	} else {
 		log.Info("No strategy set, falling back on queue strategy with a group size 1")
-		u.Strategy.Queue = &QueueStrategy{GroupSize: 1}
 	}
 	return nil
 }
