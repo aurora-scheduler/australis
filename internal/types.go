@@ -52,6 +52,7 @@ type Job struct {
 	Disk        int64             `yaml:"disk"`
 	Executor    Executor          `yaml:"executor"`
 	Instances   int32             `yaml:"instances"`
+	MaxFailures int32             `yaml:"maxFailures"`
 	URIs        []URI             `yaml:"uris"`
 	Metadata    map[string]string `yaml:"labels"`
 	Service     bool              `yaml:"service"`
@@ -59,22 +60,22 @@ type Job struct {
 	Container   *Container        `yaml:"container,omitempty"`
 }
 type InstanceRange struct {
-	Start int `yaml:"start"`
-	End   int `yaml:"end"`
+	First int32 `yaml:"first"`
+	Last  int32 `yaml:"last"`
 }
 
 type VariableBatchStrategy struct {
-	GroupSizes []int `yaml:"groupSizes"`
-	AutoPause  bool  `yaml:"autoPause"`
+	GroupSizes []int32 `yaml:"groupSizes"`
+	AutoPause  bool    `yaml:"autoPause"`
 }
 
 type BatchStrategy struct {
-	GroupSize int  `yaml:"groupSize"`
-	AutoPause bool `yaml:"autoPause"`
+	GroupSize int32 `yaml:"groupSize"`
+	AutoPause bool  `yaml:"autoPause"`
 }
 
 type QueueStrategy struct {
-	GroupSize int `yaml:"groupSize"`
+	GroupSize int32 `yaml:"groupSize"`
 }
 
 type UpdateStrategy struct {
@@ -83,12 +84,13 @@ type UpdateStrategy struct {
 	Queue         *QueueStrategy         `yaml:"queue"`
 }
 type UpdateSettings struct {
-	MaxPerInstanceFailures int             `yaml:"maxPerInstanceFailures"`
-	MaxFailedInstances     int             `yaml:"maxFailedInstances"`
+	MaxPerInstanceFailures int32           `yaml:"maxPerInstanceFailures"`
+	MaxFailedInstances     int32           `yaml:"maxFailedInstances"`
 	MinTimeInRunning       time.Duration   `yaml:"minTimeRunning"`
 	RollbackOnFailure      bool            `yaml:"rollbackOnFailure"`
 	InstanceRanges         []InstanceRange `yaml:"instanceRanges"`
-	BlockIfNoPulseAfter    time.Duration   `yaml:"blockIfNoPulseAfter"`
+	InstanceCount          int32           `yaml:"instanceCount"`
+	PulseTimeout           time.Duration   `yaml:"pulseTimeout"`
 	SLAAware               bool            `yaml:"slaAware"`
 	Strategy               UpdateStrategy  `yaml:"strategy"`
 }
