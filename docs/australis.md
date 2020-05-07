@@ -34,6 +34,7 @@ A light-weight command line client for use with Apache Aurora built using goreal
 * [australis restart](australis_restart.md)	 - Restart an Aurora Job.
 * [australis resume](australis_resume.md)	 - Resume a Job update
 * [australis rollback](australis_rollback.md)	 - Rollback an operation such as an Update
+* [australis schedule](australis_schedule.md)	 - Schedule a cron job on Aurora scheduler
 * [australis set](australis_set.md)	 - Set a value in the Aurora Scheduler.
 * [australis start](australis_start.md)	 - Start a service, maintenance on a host (DRAIN), a snapshot, an update, or a backup.
 * [australis stop](australis_stop.md)	 - Stop a service or maintenance on a host (DRAIN).

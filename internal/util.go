@@ -118,41 +118,6 @@ func UnmarshalJob(filename string) (Job, error) {
 	return job, nil
 }
 
-func (j *Job) Validate() error {
-	if j.Name == "" {
-		return errors.New("job name not specified")
-	}
-
-	if j.Role == "" {
-		return errors.New("job role not specified")
-	}
-
-	if j.Environment == "" {
-		return errors.New("job environment not specified")
-	}
-
-	if j.Instances <= 0 {
-		return errors.New("number of instances in job cannot be less than or equal to 0")
-	}
-
-	if j.CPU <= 0.0 {
-		return errors.New("CPU must be greater than 0")
-	}
-
-	if j.RAM <= 0 {
-		return errors.New("RAM must be greater than 0")
-	}
-
-	if j.Disk <= 0 {
-		return errors.New("Disk must be greater than 0")
-	}
-
-	if len(j.Thermos) == 0 && j.Executor.Name == "" && j.Container == nil {
-		return errors.New("task does not contain a thermos definition, a custom executor name, or a container to launch")
-	}
-	return nil
-}
-
 func UnmarshalUpdate(filename string) (UpdateJob, error) {
 
 	updateJob := UpdateJob{}
@@ -173,32 +138,4 @@ func UnmarshalUpdate(filename string) (UpdateJob, error) {
 	}
 
 	return updateJob, nil
-}
-
-func (u *UpdateSettings) Validate() error {
-	if u.InstanceCount <= 0 {
-		return errors.New("instance count must be larger than 0")
-	}
-
-	if u.Strategy.VariableBatch != nil {
-		if len(u.Strategy.VariableBatch.GroupSizes) == 0 {
-			return errors.New("variable batch strategy must specify at least one batch size")
-		}
-		for _, batch := range u.Strategy.VariableBatch.GroupSizes {
-			if batch <= 0 {
-				return errors.New("all groups in a variable batch strategy must be larger than 0")
-			}
-		}
-	} else if u.Strategy.Batch != nil {
-		if u.Strategy.Batch.GroupSize <= 0 {
-			return errors.New("batch strategy must specify a group larger than 0")
-		}
-	} else if u.Strategy.Queue != nil {
-		if u.Strategy.Queue.GroupSize <= 0 {
-			return errors.New("queue strategy must specify a group larger than 0")
-		}
-	} else {
-		log.Info("No strategy set, falling back on queue strategy with a group size 1")
-	}
-	return nil
 }
