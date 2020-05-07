@@ -89,7 +89,8 @@ func (u *UpdateJob) ToRealis() (*realis.JobUpdate, error) {
         WatchTime(u.UpdateSettings.MinTimeInRunning).
         RollbackOnFail(u.UpdateSettings.RollbackOnFailure).
         PulseIntervalTimeout(u.UpdateSettings.PulseTimeout).
-        SlaAware(u.UpdateSettings.SLAAware).InstanceCount(u.UpdateSettings.InstanceCount)
+        SlaAware(u.UpdateSettings.SLAAware).
+        InstanceCount(u.UpdateSettings.InstanceCount)
 
     strategy := u.UpdateSettings.Strategy
     switch {
