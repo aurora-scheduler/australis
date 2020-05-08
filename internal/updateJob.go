@@ -49,7 +49,7 @@ type UpdateStrategy struct {
 type UpdateSettings struct {
 	MaxPerInstanceFailures int32           `yaml:"maxPerInstanceFailures"`
 	MaxFailedInstances     int32           `yaml:"maxFailedInstances"`
-	MinTimeInRunning       time.Duration   `yaml:"minTimeRunning"`
+	MinTimeInRunning       time.Duration   `yaml:"minTimeInRunning"`
 	RollbackOnFailure      bool            `yaml:"rollbackOnFailure"`
 	InstanceRanges         []InstanceRange `yaml:"instanceRanges"`
 	InstanceCount          int32           `yaml:"instanceCount"`

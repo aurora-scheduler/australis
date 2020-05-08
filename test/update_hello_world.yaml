@@ -18,11 +18,12 @@ updateSettings:
   maxFailedInstances: 1
   minTimeInRunning: 1m
   rollbackOnFailure: true
+  instanceCount: 1
   instanceRanges:
     - first: 1
       last: 4
   pulseTimeout: 1m
   strategy:
-    batch:
-      groupSize: 2
-      autoPause: false
+    variableBatch:
+      groupSizes: [1,2,3]
+      autoPause: true
