@@ -21,7 +21,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(createCmd)
-	createCmd.Flags().BoolVarP(&monitor, "monitor", "m", false, "monitor the result after sending the command")
+	createCmd.Flags().BoolVarP(&monitor, "monitor", "m", true, "monitor the result after sending the command")
 }
 
 var createCmd = &cobra.Command{
