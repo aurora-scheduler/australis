@@ -1,8 +1,16 @@
-australis (0.1.2) unstable; urgency=medium
+australis (1.0.0) stable; urgency=medium
 
-  * Unreleased
+  * First stable release.
 
- -- Renan DelValle <renanidelvalle@gmail.com>  Mon, 19 Feb 2020 12:00:00 -0700
+ -- Renan Del Valle <maintainer@ridv.xyz>  Wed, 30 Sep 2020 15:39:29 -0700
+
+australis (0.22.0) unstable; urgency=medium
+
+  * Added support for starting job updates.
+  * Added support for setting SlaAwareness for updates.
+  * Added upport for scheduling cron jobs.
+
+ -- Renan Del Valle <maintainer@ridv.xyz>  Thu, 07 May 2020 12:00:00 -0700
 
 australis (0.1.1) unstable; urgency=medium
 
