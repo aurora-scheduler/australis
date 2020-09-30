@@ -49,7 +49,7 @@ var updateID string
 var monitor bool
 var log = logrus.New()
 
-const australisVer = "v1.0.0"
+const australisVer = "v1.0.1"
 
 var forceDrainTimeout time.Duration
 

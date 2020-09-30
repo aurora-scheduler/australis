@@ -1,3 +1,9 @@
+australis (1.0.1) stable; urgency=medium
+
+  * Added flag -m and --monitor that can be set in order to monitor a job creation or a job kill. By default monitor is set to true.
+
+ -- Renan Del Valle <maintainer@ridv.xyz>  Wed, 30 Sep 2020 16:46:56 -0700
+
 australis (1.0.0) stable; urgency=medium
 
   * First stable release.
