@@ -30,6 +30,7 @@ func init() {
 	killJobCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
 	killJobCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	killJobCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
+	killJobCmd.Flags().BoolVarP(&monitor, "monitor", "m", false, "monitor the result after sending the command")
 	killJobCmd.MarkFlagRequired("environment")
 	killJobCmd.MarkFlagRequired("role")
 	killJobCmd.MarkFlagRequired("name")
@@ -57,8 +58,9 @@ func killJob(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	if ok, err := client.MonitorInstances(job.JobKey(), 0, 5, 50); !ok || err != nil {
-		log.Fatalln("Unable to kill all instances of job")
+	if monitor {
+		if ok, err := client.MonitorInstances(job.JobKey(), 0, 5, 50); !ok || err != nil {
+			log.Fatalln("Unable to kill all instances of job")
+		}
 	}
 }

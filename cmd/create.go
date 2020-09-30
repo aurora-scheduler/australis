@@ -21,13 +21,14 @@ import (
 
 func init() {
 	rootCmd.AddCommand(createCmd)
+	createCmd.Flags().BoolVarP(&monitor, "monitor", "m", false, "monitor the result after sending the command")
 }
 
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create an Aurora Job",
 	Run:   createJob,
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.RangeArgs(1, 2),
 }
 
 func createJob(cmd *cobra.Command, args []string) {
@@ -46,14 +47,15 @@ func createJob(cmd *cobra.Command, args []string) {
 		log.Fatal("unable to create Aurora job: ", err)
 	}
 
-	if ok, monitorErr := client.MonitorInstances(auroraJob.JobKey(),
-		auroraJob.GetInstanceCount(),
-		5,
-		50); !ok || monitorErr != nil {
-		if err := client.KillJob(auroraJob.JobKey()); err != nil {
-			log.Fatal(monitorErr, err)
+	if monitor {
+		if ok, monitorErr := client.MonitorInstances(auroraJob.JobKey(),
+			auroraJob.GetInstanceCount(),
+			5,
+			50); !ok || monitorErr != nil {
+			if err := client.KillJob(auroraJob.JobKey()); err != nil {
+				log.Fatal(monitorErr, err)
+			}
+			log.Fatal(monitorErr)
 		}
-		log.Fatal(monitorErr)
 	}
-
 }

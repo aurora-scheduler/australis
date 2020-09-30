@@ -46,6 +46,7 @@ var count int64
 var filename string
 var message = new(string)
 var updateID string
+var monitor bool
 var log = logrus.New()
 
 const australisVer = "v0.22.0"
