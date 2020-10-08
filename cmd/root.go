@@ -47,6 +47,7 @@ var filename string
 var message = new(string)
 var updateID string
 var monitor bool
+var timeout time.Duration // seconds
 var log = logrus.New()
 
 const australisVer = "v1.0.1"
@@ -68,6 +69,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "/etc/aurora/australis.yml", "Config file to use.")
 	rootCmd.PersistentFlags().BoolVar(&toJson, "toJSON", false, "Print output in JSON format.")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info", "Set logging level ["+internal.GetLoggingLevels()+"].")
+	rootCmd.PersistentFlags().DurationVarP(&timeout, "timeout", "t", 20, "Gorealis timeout (default: 20 seconds)")
 }
 
 var rootCmd = &cobra.Command{
@@ -142,7 +144,7 @@ func connect(cmd *cobra.Command, args []string) {
 
 	realisOptions := []realis.ClientOption{realis.BasicAuth(username, password),
 		realis.ThriftJSON(),
-		realis.Timeout(20 * time.Second),
+		realis.Timeout(timeout * time.Second),
 		realis.BackOff(realis.Backoff{
 			Steps:    2,
 			Duration: 10 * time.Second,
