@@ -50,7 +50,7 @@ var monitor bool
 var timeout int64 // seconds
 var log = logrus.New()
 
-const australisVer = "v0.22.0"
+const australisVer = "v1.0.1"
 
 var forceDrainTimeout time.Duration
 
