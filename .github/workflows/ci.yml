@@ -16,7 +16,7 @@ jobs:
     - name: Install goimports
       run: go get golang.org/x/tools/cmd/goimports
     - name: Run goimports check
-      run: test -z "`for d in $GO_USR_DIRS; do goimports -d $d/*.go | tee /dev/stderr; done`"
+      run: test -z `for d in $GO_USR_DIRS; do goimports -d "$d" | tee /dev/stderr; done`
       env:
         GO_USR_DIRS: $(go list -f {{.Dir}} ./... | grep -E -v "/gen-go/|/vendor/")
     - name: Run tests
