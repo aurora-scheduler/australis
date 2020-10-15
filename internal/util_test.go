@@ -35,4 +35,3 @@ func TestUnmarshalUpdate(t *testing.T) {
 	_, err := UnmarshalUpdate("../test/update_hello_world.yaml")
 	assert.NoError(t, err)
 }
-

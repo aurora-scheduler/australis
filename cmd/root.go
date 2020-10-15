@@ -69,7 +69,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "/etc/aurora/australis.yml", "Config file to use.")
 	rootCmd.PersistentFlags().BoolVar(&toJson, "toJSON", false, "Print output in JSON format.")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info", "Set logging level ["+internal.GetLoggingLevels()+"].")
-	rootCmd.PersistentFlags().DurationVarP(&timeout, "timeout", "t", 20 * time.Second, "Gorealis timeout.")
+	rootCmd.PersistentFlags().DurationVarP(&timeout, "timeout", "t", 20*time.Second, "Gorealis timeout.")
 }
 
 var rootCmd = &cobra.Command{

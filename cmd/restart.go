@@ -15,34 +15,33 @@
 package cmd
 
 import (
-    "github.com/aurora-scheduler/gorealis/v2/gen-go/apache/aurora"
-    "github.com/spf13/cobra"
+	"github.com/aurora-scheduler/gorealis/v2/gen-go/apache/aurora"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-    rootCmd.AddCommand(restartCmd)
+	rootCmd.AddCommand(restartCmd)
 
-
-    restartCmd.AddCommand(restartJobCmd)
-    restartJobCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
-    restartJobCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
-    restartJobCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
+	restartCmd.AddCommand(restartJobCmd)
+	restartJobCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
+	restartJobCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
+	restartJobCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
 }
 
 var restartCmd = &cobra.Command{
-    Use:   "restart",
-    Short: "Restart an Aurora Job.",
+	Use:   "restart",
+	Short: "Restart an Aurora Job.",
 }
 
 var restartJobCmd = &cobra.Command{
-    Use:   "job",
-    Short: "Restart a Job.",
-    Run: restartJob,
+	Use:   "job",
+	Short: "Restart a Job.",
+	Run:   restartJob,
 }
 
 func restartJob(cmd *cobra.Command, args []string) {
-    key := aurora.JobKey{Environment: *env, Role: *role, Name: *name}
-    if err := client.RestartJob(key); err != nil {
-        log.Fatal("unable to create Aurora job: ", err)
-    }
+	key := aurora.JobKey{Environment: *env, Role: *role, Name: *name}
+	if err := client.RestartJob(key); err != nil {
+		log.Fatal("unable to create Aurora job: ", err)
+	}
 }

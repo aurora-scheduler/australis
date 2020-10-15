@@ -42,4 +42,3 @@ In MacOS this directory is $(brew --prefix)/etc/bash_completion.d if auto comple
 		rootCmd.GenBashCompletionFile(filename)
 	},
 }
-
