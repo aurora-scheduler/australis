@@ -146,9 +146,9 @@ func connect(cmd *cobra.Command, args []string) {
 		realis.ThriftJSON(),
 		realis.Timeout(timeout),
 		realis.BackOff(realis.Backoff{
-			Steps:    2,
+			Steps:    6,
 			Duration: 10 * time.Second,
-			Factor:   2.0,
+			Factor:   1.5,
 			Jitter:   0.1,
 		}),
 		realis.SetLogger(log)}
