@@ -47,6 +47,17 @@ type Container struct {
 	Docker *DockerContainer `yaml:"docker"`
 }
 
+type ValueConstraint struct {
+	Name    string   `yaml:"name"`
+	Values  []string `yaml:"values"`
+	Negated bool     `yaml:"negated"`
+}
+
+type LimitConstraint struct {
+	Name  string `yaml:"name"`
+	Limit int32  `yaml:"limit"`
+}
+
 type Job struct {
 	Environment         string            `yaml:"environment"`
 	Role                string            `yaml:"role"`
@@ -64,6 +75,8 @@ type Job struct {
 	Container           *Container        `yaml:"container,omitempty"`
 	CronSchedule        *string           `yaml:"cronSchedule,omitempty"`
 	CronCollisionPolicy *string           `yaml:"cronCollisionPolicy,omitempty"`
+	ValueConstraints    []ValueConstraint `yaml:"valueConstraints,flow,omitempty"`
+	LimitConstraints    []LimitConstraint `yaml:"limitConstraints,flow,omitempty"`
 }
 
 func (j *Job) ToRealis() (*realis.AuroraJob, error) {
@@ -125,6 +138,15 @@ func (j *Job) ToRealis() (*realis.AuroraJob, error) {
 
 	}
 
+	// Setting Constraints
+	for _, valConstraint := range j.ValueConstraints {
+		auroraJob.AddValueConstraint(valConstraint.Name, valConstraint.Negated, valConstraint.Values...)
+	}
+
+	for _, limit := range j.LimitConstraints {
+		auroraJob.AddLimitConstraint(limit.Name, limit.Limit)
+	}
+
 	return auroraJob, nil
 }
 
@@ -162,6 +184,7 @@ func (j *Job) Validate() error {
 	}
 	return nil
 }
+
 func (j *Job) ValidateCron() error {
 	if j.CronSchedule == nil {
 		return errors.New("cron schedule must be set")

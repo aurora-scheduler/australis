@@ -1,0 +1,30 @@
+---
+environment: "prod"
+role: "vagrant"
+name: "hello_world"
+cpu: 0.09
+ram: 64
+disk: 128
+instances: 1
+valueConstraints:
+  - name: "dedicated"
+    values:
+      - "vagrant/bar"
+thermos:
+  - name: "bootstrap"
+    cmd: "echo bootstrapping"
+  - name: "hello_gorealis"
+    cmd: "while true; do echo hello world from gorealis; sleep 10; done"
+updateSettings:
+  maxPerInstanceFailures: 1
+  maxFailedInstances: 1
+  minTimeInRunning: 1m
+  rollbackOnFailure: true
+  instanceRanges:
+    - start: 1
+      end: 4
+  blockIfNoPulseAfter: 1m
+  slaAware: false
+  strategy:
+    name: Batch
+    groupSize: 2
