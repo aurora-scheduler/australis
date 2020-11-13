@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Temporary fix for a go mods bug
-rm /australis/go.sum
-
 # Build debian package
 cd /australis
 debuild -d -us -uc -b

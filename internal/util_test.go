@@ -25,6 +25,11 @@ func TestUnmarshalJob(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestUnmarshalDedicatedJob(t *testing.T) {
+	_, err := UnmarshalJob("../test/hello_world_dedicated.yaml")
+	assert.NoError(t, err)
+}
+
 func TestUnmarshalCron(t *testing.T) {
 	cron, err := UnmarshalJob("../test/hello_world_cron.yaml")
 	assert.NoError(t, err)
@@ -35,4 +40,3 @@ func TestUnmarshalUpdate(t *testing.T) {
 	_, err := UnmarshalUpdate("../test/update_hello_world.yaml")
 	assert.NoError(t, err)
 }
-
