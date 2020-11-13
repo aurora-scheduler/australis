@@ -62,6 +62,23 @@ func init() {
 		help(cmd, s)
 	})
 
+	/* Fetch mesos leader */
+	mesosCmd.Flags().String("zkPath", "/mesos", "Zookeeper node path where mesos leader election happens")
+
+	fetchCmd.AddCommand(mesosCmd)
+
+	// Hijack help function to hide unnecessary global flags
+	mesosCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+		if cmd.HasInheritedFlags() {
+			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag) {
+				if f.Name != "logLevel" {
+					f.Hidden = true
+				}
+			})
+		}
+		help(cmd, s)
+	})
+
 	// Fetch jobs
 	fetchJobsCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	fetchCmd.AddCommand(fetchJobsCmd)
@@ -104,6 +121,18 @@ var leaderCmd = &cobra.Command{
 	Long: `Gets the current leading aurora scheduler instance using information from Zookeeper path.
 Pass Zookeeper nodes separated by a space as an argument to this command.`,
 	Run: fetchLeader,
+}
+
+var mesosCmd = &cobra.Command{
+	Use:               "mesos [zkNode0, zkNode1, ...zkNodeN]",
+	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
+	PreRun:            setConfig,
+	Args:              cobra.MinimumNArgs(1),
+	Short:             "Fetch current Mesos-master leader given Zookeeper nodes. ",
+	Long: `Gets the current leading Mesos-master instance using information from Zookeeper path.
+Pass Zookeeper nodes separated by a space as an argument to this command.`,
+	Run: fetchMesos,
 }
 
 var fetchJobsCmd = &cobra.Command{
@@ -210,6 +239,23 @@ func fetchLeader(cmd *cobra.Command, args []string) {
 	}
 
 	url, err := realis.LeaderFromZKOpts(realis.ZKEndpoints(args...), realis.ZKPath(cmd.Flag("zkPath").Value.String()))
+
+	if err != nil {
+		log.Fatalf("error: %+v\n", err)
+	}
+
+	fmt.Println(url)
+}
+
+func fetchMesos(cmd *cobra.Command, args []string) {
+	log.Infof("Fetching Mesos-master leader from %v \n", args)
+
+	if len(args) < 1 {
+		log.Info("Zookeepers were not indicated. Fetch mesos via localhost.")
+		args = append(args, "localhost")
+	}
+
+	url, err := realis.MesosFromZKOpts(realis.ZKEndpoints(args...), realis.ZKPath(cmd.Flag("zkPath").Value.String()))
 
 	if err != nil {
 		log.Fatalf("error: %+v\n", err)
