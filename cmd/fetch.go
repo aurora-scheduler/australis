@@ -128,7 +128,6 @@ var mesosCmd = &cobra.Command{
 	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	PreRun:            setConfig,
-	Args:              cobra.MinimumNArgs(1),
 	Short:             "Fetch current Mesos-master leader given Zookeeper nodes. ",
 	Long: `Gets the current leading Mesos-master instance using information from Zookeeper path.
 Pass Zookeeper nodes separated by a space as an argument to this command.`,
