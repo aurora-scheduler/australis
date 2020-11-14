@@ -247,12 +247,10 @@ func fetchLeader(cmd *cobra.Command, args []string) {
 }
 
 func fetchMesos(cmd *cobra.Command, args []string) {
-	log.Infof("Fetching Mesos-master leader from %v \n", args)
-
 	if len(args) < 1 {
-		log.Info("Zookeepers were not indicated. Fetch mesos via localhost.")
 		args = append(args, "localhost")
 	}
+	log.Infof("Fetching Mesos-master leader from %v \n", args)
 
 	url, err := realis.MesosFromZKOpts(realis.ZKEndpoints(args...), realis.ZKPath(cmd.Flag("zkPath").Value.String()))
 
