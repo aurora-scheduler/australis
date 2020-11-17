@@ -47,7 +47,7 @@ var filename string
 var message = new(string)
 var updateID string
 var monitor bool
-var timeout time.Duration // seconds
+var timeout time.Duration
 var log = logrus.New()
 
 const australisVer = "v1.0.1"
