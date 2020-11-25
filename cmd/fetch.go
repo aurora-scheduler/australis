@@ -15,13 +15,19 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/aurora-scheduler/australis/internal"
 	realis "github.com/aurora-scheduler/gorealis/v2"
 	"github.com/aurora-scheduler/gorealis/v2/gen-go/apache/aurora"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+)
+
+const (
+	localAgentStateURL = "http://127.0.0.1:5051/state"
 )
 
 func init() {
@@ -124,14 +130,15 @@ Pass Zookeeper nodes separated by a space as an argument to this command.`,
 }
 
 var mesosCmd = &cobra.Command{
-	Use:               "mesos [zkNode0, zkNode1, ...zkNodeN]",
+	Use:               "mesos leader [zkNode0, zkNode1, ...zkNodeN]",
 	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	PreRun:            setConfig,
 	Short:             "Fetch current Mesos-master leader given Zookeeper nodes. ",
 	Long: `Gets the current leading Mesos-master instance using information from Zookeeper path.
-Pass Zookeeper nodes separated by a space as an argument to this command.`,
-	Run: fetchMesos,
+Pass Zookeeper nodes separated by a space as an argument to this command. If no nodes are provided, 
+it fetches leader from local Mesos-agent instance`,
+	Run: fetchMesosLeader,
 }
 
 var fetchJobsCmd = &cobra.Command{
@@ -246,9 +253,16 @@ func fetchLeader(cmd *cobra.Command, args []string) {
 	fmt.Println(url)
 }
 
-func fetchMesos(cmd *cobra.Command, args []string) {
+func fetchMesosLeader(cmd *cobra.Command, args []string) {
+	var url string
 	if len(args) < 1 {
-		args = append(args, "localhost")
+		url = fetchMesosLeaderFromAgent(localAgentStateURL)
+		if url == "" {
+			log.Warn("unable to fetch Mesos leader from local Mesos agent, please try again with zk nodes")
+		} else {
+			fmt.Println(url)
+		}
+		return
 	}
 	log.Infof("Fetching Mesos-master leader from %v \n", args)
 
@@ -259,6 +273,30 @@ func fetchMesos(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println(url)
+}
+
+func fetchMesosLeaderFromAgent(url string) (mesosLeaderHostName string) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+	if resp.StatusCode != 200 {
+		return
+	}
+	defer resp.Body.Close()
+
+	var res interface{}
+	err = json.NewDecoder(resp.Body).Decode(&res)
+	if err != nil {
+		return
+	}
+	hostname, ok := res.(map[string]interface{})["master_hostname"]
+	if !ok {
+		return
+	}
+	mesosLeaderHostName, _ = hostname.(string)
+
+	return mesosLeaderHostName
 }
 
 // TODO: Expand this to be able to filter by job name and environment.
