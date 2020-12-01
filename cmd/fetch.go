@@ -15,7 +15,12 @@
 package cmd
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 
 	"github.com/aurora-scheduler/australis/internal"
 	realis "github.com/aurora-scheduler/gorealis/v2"
@@ -23,6 +28,19 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
+
+const (
+	localAgentStateURL = "http://127.0.0.1:5051/state"
+)
+
+type mesosAgentState struct {
+	Flags mesosAgentFlags `json:"flags,omitempty"`
+}
+
+type mesosAgentFlags struct {
+	Master    string `json:"master,omitempty"`
+	hasMaster bool   // indicates if the master flag contains direct Master's address
+}
 
 func init() {
 	rootCmd.AddCommand(fetchCmd)
@@ -62,8 +80,8 @@ func init() {
 		help(cmd, s)
 	})
 
-	/* Fetch mesos leader */
-	mesosCmd.Flags().String("zkPath", "/mesos", "Zookeeper node path where mesos leader election happens")
+	mesosLeaderCmd.Flags().String("zkPath", "/mesos", "Zookeeper node path where mesos leader election happens")
+	mesosCmd.AddCommand(mesosLeaderCmd)
 
 	fetchCmd.AddCommand(mesosCmd)
 
@@ -124,14 +142,21 @@ Pass Zookeeper nodes separated by a space as an argument to this command.`,
 }
 
 var mesosCmd = &cobra.Command{
-	Use:               "mesos [zkNode0, zkNode1, ...zkNodeN]",
+	Use:    "mesos",
+	PreRun: setConfig,
+	Short:  "Fetch information from Mesos.",
+}
+
+var mesosLeaderCmd = &cobra.Command{
+	Use:               "leader [zkNode0, zkNode1, ...zkNodeN]",
 	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
 	PreRun:            setConfig,
-	Short:             "Fetch current Mesos-master leader given Zookeeper nodes. ",
+	Short:             "Fetch current Mesos-master leader given Zookeeper nodes.",
 	Long: `Gets the current leading Mesos-master instance using information from Zookeeper path.
-Pass Zookeeper nodes separated by a space as an argument to this command.`,
-	Run: fetchMesos,
+Pass Zookeeper nodes separated by a space as an argument to this command. If no nodes are provided, 
+it fetches leader from local Mesos agent or Zookeeper`,
+	Run: fetchMesosLeader,
 }
 
 var fetchJobsCmd = &cobra.Command{
@@ -246,11 +271,20 @@ func fetchLeader(cmd *cobra.Command, args []string) {
 	fmt.Println(url)
 }
 
-func fetchMesos(cmd *cobra.Command, args []string) {
+func fetchMesosLeader(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
-		args = append(args, "localhost")
+		mesosAgentFlags, err := fetchMasterFromAgent(localAgentStateURL)
+		if err != nil || mesosAgentFlags.Master == "" {
+			log.Debugf("unable to fetch Mesos leader via local Mesos agent: %v", err)
+			args = append(args, "localhost")
+		} else if mesosAgentFlags.hasMaster {
+			fmt.Println(mesosAgentFlags.Master)
+			return
+		} else {
+			args = append(args, strings.Split(mesosAgentFlags.Master, ",")...)
+		}
 	}
-	log.Infof("Fetching Mesos-master leader from %v \n", args)
+	log.Infof("Fetching Mesos-master leader from Zookeeper node(s): %v \n", args)
 
 	url, err := realis.MesosFromZKOpts(realis.ZKEndpoints(args...), realis.ZKPath(cmd.Flag("zkPath").Value.String()))
 
@@ -259,6 +293,59 @@ func fetchMesos(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println(url)
+}
+
+func fetchMasterFromAgent(url string) (mesosAgentFlags mesosAgentFlags, err error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+	if resp.StatusCode != 200 {
+		return
+	}
+	defer resp.Body.Close()
+
+	state := &mesosAgentState{}
+	err = json.NewDecoder(resp.Body).Decode(state)
+	if err != nil {
+		return
+	}
+	mesosAgentFlags = state.Flags
+	err = updateMasterFlag(&mesosAgentFlags)
+	return
+}
+
+/*
+ Master flag can be passed as one of :
+ host:port
+ zk://host1:port1,host2:port2,.../path
+ zk://username:password@host1:port1,host2:port2,.../path
+ file:///path/to/file
+ This function takes care of all the above cases and updates flags with parsed values
+*/
+func updateMasterFlag(flags *mesosAgentFlags) error {
+	zkPathPrefix := "zk://"
+	filePathPrefix := "file://"
+	if strings.HasPrefix(flags.Master, zkPathPrefix) {
+		beginIndex := len(zkPathPrefix)
+		if strings.Contains(flags.Master, "@") {
+			beginIndex = strings.Index(flags.Master, "@") + 1
+		}
+		flags.Master = flags.Master[beginIndex:strings.LastIndex(flags.Master, "/")]
+	} else if strings.HasPrefix(flags.Master, filePathPrefix) {
+		content, err := ioutil.ReadFile(flags.Master)
+		if err != nil {
+			return err
+		}
+		if strings.Contains(string(content), filePathPrefix) {
+			return errors.New("invalid master file content")
+		}
+		flags.Master = string(content)
+		return updateMasterFlag(flags)
+	} else {
+		flags.hasMaster = true
+	}
+	return nil
 }
 
 // TODO: Expand this to be able to filter by job name and environment.
