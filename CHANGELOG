@@ -1,6 +1,14 @@
-0.1.2
+1.0.2
 
-* Unreleased
+* Fixing broken Thrift dependency by bumping up backported version to thrift v0.13.2
+
+1.0.1
+
+* Added flag -m and --monitor that can be set in order to monitor a job creation or a job kill. By default monitor is set to true.
+
+1.0.0
+
+* First stable release.
 
 0.1.1
 
