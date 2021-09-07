@@ -13,4 +13,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.8
 )
 
-replace github.com/apache/thrift v0.13.0 => github.com/ridv/thrift v0.13.1
+replace github.com/apache/thrift v0.13.0 => github.com/ridv/thrift v0.13.2

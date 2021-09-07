@@ -1,3 +1,9 @@
+australis (1.0.2) stable; urgency=medium
+
+  * Fixing broken Thrift dependency by bumping up backported version to thrift v0.13.2
+
+ -- Renan Del Valle <maintainer@ridv.xyz>  Mon, 11 Jan 2021 17:57:10 -0800
+
 australis (1.0.1) stable; urgency=medium
 
   * Added flag -m and --monitor that can be set in order to monitor a job creation or a job kill. By default monitor is set to true.
