@@ -103,6 +103,9 @@ func init() {
 
 	// Fetch Status
 	fetchCmd.AddCommand(fetchStatusCmd)
+
+	// fetch quota
+	fetchCmd.AddCommand(fetchQuotaCmd)
 }
 
 var fetchCmd = &cobra.Command{
@@ -171,6 +174,13 @@ var fetchStatusCmd = &cobra.Command{
 	Short: "Fetch the maintenance status of a node from Aurora",
 	Long:  `This command will print the actual status of the mesos agent nodes in Aurora server`,
 	Run:   fetchHostStatus,
+}
+
+var fetchQuotaCmd = &cobra.Command{
+	Use:   "quota",
+	Short: "Fetch the quotas of given roles",
+	Long:  `This command will print list of resource quotas with the aggregated resources for the given roles`,
+	Run:   fetchQuota,
 }
 
 func fetchTasksConfig(cmd *cobra.Command, args []string) {
@@ -378,6 +388,31 @@ func fetchJobs(cmd *cobra.Command, args []string) {
 	} else {
 		for jobConfig := range result.GetConfigs() {
 			fmt.Println(jobConfig)
+		}
+	}
+}
+
+//fetchQuota gets quotas for roles in args
+func fetchQuota(cmd *cobra.Command, args []string) {
+	for _, role := range args {
+		log.Infof("Fetching quota for role: %s \n", role)
+		result, err := client.GetQuota(role)
+		if err != nil {
+			log.Fatalf("error: %+v\n", err)
+		}
+
+		if toJson {
+			fmt.Println(internal.ToJSON(result))
+		} else {
+			fmt.Printf("  Quota: %v\n", internal.ToJSON(result.Quota.GetResources()))
+			fmt.Printf("  Aggregated Resources: \n")
+			fmt.Printf("    ProdSharedConsumption: %v\n", internal.ToJSON(result.ProdSharedConsumption.GetResources()))
+			fmt.Printf("    NonProdSharedConsumption: %v\n",
+				internal.ToJSON(result.NonProdSharedConsumption.GetResources()))
+			fmt.Printf("    ProdDedicatedConsumption: %v\n",
+				internal.ToJSON(result.ProdDedicatedConsumption.GetResources()))
+			fmt.Printf("    NonProdDedicatedConsumption: %v\n",
+				internal.ToJSON(result.NonProdDedicatedConsumption.GetResources()))
 		}
 	}
 }
