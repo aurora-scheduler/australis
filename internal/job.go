@@ -71,7 +71,9 @@ type Job struct {
 	URIs                []URI             `yaml:"uris"`
 	Metadata            map[string]string `yaml:"labels"`
 	Service             bool              `yaml:"service"`
+	Tier                string            `yaml:"tier,omitempty" default:"preemptible"`
 	Priority            int32             `yaml:"priority"`
+	Production          bool              `yaml:"production"`
 	Thermos             []ThermosProcess  `yaml:",flow,omitempty"`
 	Container           *Container        `yaml:"container,omitempty"`
 	CronSchedule        *string           `yaml:"cronSchedule,omitempty"`
@@ -89,7 +91,9 @@ func (j *Job) ToRealis() (*realis.AuroraJob, error) {
 		RAM(j.RAM).
 		Disk(j.Disk).
 		IsService(j.Service).
+		Tier(j.Tier).
 		Priority(j.Priority).
+		Production(j.Production).
 		InstanceCount(j.Instances).
 		MaxFailure(j.MaxFailures)
 
