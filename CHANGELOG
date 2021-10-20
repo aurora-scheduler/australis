@@ -1,4 +1,11 @@
-1.0.3 (unreleased)
+1.0.4 (unreleased)
+
+1.0.3
+
+* update CI to compile on PRs
+* Add tier and production in task config
+* Add fetch quota command
+* Add priority into job config
 
 1.0.2
 

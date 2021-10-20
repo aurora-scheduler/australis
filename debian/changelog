@@ -1,3 +1,12 @@
+australis (1.0.3) stable; urgency=medium
+
+  * Update CI to compile on PRs
+  * Add tier and production in task config
+  * Add fetch quota command
+  * Add priority into job config
+
+ -- Nhat Tan Le <maintainer@nhatle.xyz>  Wed, 20 Oct 2021 14:24:10 -0700
+
 australis (1.0.2) stable; urgency=medium
 
   * Fixing broken Thrift dependency by bumping up backported version to thrift v0.13.2
