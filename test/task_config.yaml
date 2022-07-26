@@ -1,0 +1,20 @@
+environment: "prod"
+role: "vagrant"
+name: "hello_world"
+cpu: 0.09
+ram: 64
+disk: 128
+valueConstraints:
+  - name: "dedicated"
+    values:
+      - "vagrant/bar"
+limitConstraints:
+  - name: "host"
+    limit: 1
+  - name: "zone"
+    limit: 2
+thermos:
+  - name: "bootstrap"
+    cmd: "echo bootstrapping"
+  - name: "hello_gorealis"
+    cmd: "while true; do echo hello world from gorealis; sleep 10; done"
