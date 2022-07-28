@@ -108,10 +108,10 @@ func init() {
 	fetchCmd.AddCommand(fetchQuotaCmd)
 
 	// fetch capacity
-	fetchCmd.AddCommand(fetchCapacityCmd)
+	fetchCmd.AddCommand(fetchAvailCapacityCmd)
 
 	// Hijack help function to hide unnecessary global flags
-	fetchCapacityCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+	fetchAvailCapacityCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
 		if cmd.HasInheritedFlags() {
 			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag) {
 				if f.Name != "logLevel" {
@@ -198,12 +198,12 @@ var fetchQuotaCmd = &cobra.Command{
 	Run:   fetchQuota,
 }
 
-var fetchCapacityCmd = &cobra.Command{
+var fetchAvailCapacityCmd = &cobra.Command{
 	Use:    "capacity",
 	PreRun: setConfig,
 	Short:  "Fetch capacity report",
 	Long:   `This command will show detailed capacity report of the cluster`,
-	Run:    fetchCapacity,
+	Run:    fetchAvailCapacity,
 }
 
 func fetchTasksConfig(cmd *cobra.Command, args []string) {
@@ -440,9 +440,9 @@ func fetchQuota(cmd *cobra.Command, args []string) {
 	}
 }
 
-//fetchCapacity reports free capacity in details
-func fetchCapacity(cmd *cobra.Command, args []string) {
-	log.Infof("Fetching capacity from  %s/offers\n", client.GetSchedulerURL())
+//fetchAvailCapacity reports free capacity in details
+func fetchAvailCapacity(cmd *cobra.Command, args []string) {
+	log.Infof("Fetching available capacity from  %s/offers\n", client.GetSchedulerURL())
 
 	report, err := client.AvailOfferReport()
 	if err != nil {
