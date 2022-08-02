@@ -51,7 +51,7 @@ var monitor bool
 var timeout time.Duration
 var log = logrus.New()
 
-const australisVer = "v1.0.2"
+const australisVer = "v1.0.4"
 
 var forceDrainTimeout time.Duration
 
