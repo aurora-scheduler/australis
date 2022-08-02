@@ -1,3 +1,10 @@
+australis (1.0.4) stable; urgency=medium
+
+  * fetch free capacity
+  * simulate task fitting - compute how many tasks can be fit in the remaining capacity
+
+ -- Nhat Tan Le <maintainer@nhatle.xyz>  Tue, 2 Aug 2022 16:19:24 -0700
+
 australis (1.0.3) stable; urgency=medium
 
   * Update CI to compile on PRs
