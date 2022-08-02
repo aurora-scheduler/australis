@@ -118,6 +118,26 @@ func UnmarshalJob(filename string) (Job, error) {
 	return job, nil
 }
 
+func UnmarshalTaskConfig(filename string) (*aurora.TaskConfig, error) {
+	if jobsFile, err := os.Open(filename); err != nil {
+		return nil, errors.Wrap(err, "unable to read the task config file")
+	} else {
+		job := Job{}
+
+		if err := yaml.NewDecoder(jobsFile).Decode(&job); err != nil {
+			return nil, errors.Wrap(err, "unable to parse task config file")
+		}
+
+		if auroraJob, err := job.ToRealis(); err != nil {
+			return nil, errors.Wrap(err, "unable to parse task config file")
+		} else {
+			return auroraJob.JobConfig().TaskConfig, nil
+		}
+	}
+
+	return nil, nil
+}
+
 func UnmarshalUpdate(filename string) (UpdateJob, error) {
 
 	updateJob := UpdateJob{}

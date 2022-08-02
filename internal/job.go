@@ -65,6 +65,8 @@ type Job struct {
 	CPU                 float64           `yaml:"cpu"`
 	RAM                 int64             `yaml:"ram"`
 	Disk                int64             `yaml:"disk"`
+	Port                int64             `yaml:"port"`
+	GPU                 int64             `yaml:"gpu"`
 	Executor            Executor          `yaml:"executor"`
 	Instances           int32             `yaml:"instances"`
 	MaxFailures         int32             `yaml:"maxFailures"`
@@ -90,6 +92,8 @@ func (j *Job) ToRealis() (*realis.AuroraJob, error) {
 		CPU(j.CPU).
 		RAM(j.RAM).
 		Disk(j.Disk).
+		AddPorts(int(j.Port)).
+		GPU(j.GPU).
 		IsService(j.Service).
 		Tier(j.Tier).
 		Priority(j.Priority).

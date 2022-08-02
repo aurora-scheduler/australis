@@ -106,6 +106,21 @@ func init() {
 
 	// fetch quota
 	fetchCmd.AddCommand(fetchQuotaCmd)
+
+	// fetch capacity
+	fetchCmd.AddCommand(fetchAvailCapacityCmd)
+
+	// Hijack help function to hide unnecessary global flags
+	fetchAvailCapacityCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+		if cmd.HasInheritedFlags() {
+			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag) {
+				if f.Name != "logLevel" {
+					f.Hidden = true
+				}
+			})
+		}
+		help(cmd, s)
+	})
 }
 
 var fetchCmd = &cobra.Command{
@@ -181,6 +196,14 @@ var fetchQuotaCmd = &cobra.Command{
 	Short: "Fetch the quotas of given roles",
 	Long:  `This command will print list of resource quotas with the aggregated resources for the given roles`,
 	Run:   fetchQuota,
+}
+
+var fetchAvailCapacityCmd = &cobra.Command{
+	Use:    "capacity",
+	PreRun: setConfig,
+	Short:  "Fetch capacity report",
+	Long:   `This command will show detailed capacity report of the cluster`,
+	Run:    fetchAvailCapacity,
 }
 
 func fetchTasksConfig(cmd *cobra.Command, args []string) {
@@ -414,5 +437,42 @@ func fetchQuota(cmd *cobra.Command, args []string) {
 			fmt.Printf("    NonProdDedicatedConsumption: %v\n",
 				internal.ToJSON(result.NonProdDedicatedConsumption.GetResources()))
 		}
+	}
+}
+
+//fetchAvailCapacity reports free capacity in details
+func fetchAvailCapacity(cmd *cobra.Command, args []string) {
+	log.Infof("Fetching available capacity from  %s/offers\n", client.GetSchedulerURL())
+
+	report, err := client.AvailOfferReport()
+	if err != nil {
+		log.Fatalf("error: %+v\n", err)
+	}
+
+	// convert report to user-friendly structure
+	capacity := map[string]map[string]map[string]int64{}
+	for g, gv := range report {
+		if _, ok := capacity[g]; !ok {
+			capacity[g] = map[string]map[string]int64{}
+		}
+
+		for r, rc := range gv {
+			if _, ok := capacity[g][r]; !ok {
+				capacity[g][r] = map[string]int64{}
+			}
+
+			for v, c := range rc {
+				capacity[g][r][fmt.Sprint(v)] = c
+			}
+		}
+	}
+
+	if toJson {
+		fmt.Println(internal.ToJSON(capacity))
+		if err != nil {
+			log.Fatalf("error: %+v\n", err)
+		}
+	} else {
+		fmt.Println(capacity)
 	}
 }
