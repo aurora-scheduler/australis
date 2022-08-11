@@ -121,6 +121,27 @@ func init() {
 		}
 		help(cmd, s)
 	})
+
+	// fetch tasks with status
+	fetchCmd.AddCommand(fetchTasksWithStatusCmd)
+
+	fetchTasksWithStatusCmd.Flags().StringVarP(taskStatus, "taskStatus", "x", "", "Task Status")
+	fetchTasksWithStatusCmd.MarkFlagRequired("taskStatus")
+	fetchTasksWithStatusCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
+	fetchTasksWithStatusCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
+	fetchTasksWithStatusCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
+
+	// Hijack help function to hide unnecessary global flags
+	fetchTasksWithStatusCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+		if cmd.HasInheritedFlags() {
+			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag) {
+				if f.Name != "logLevel" {
+					f.Hidden = true
+				}
+			})
+		}
+		help(cmd, s)
+	})
 }
 
 var fetchCmd = &cobra.Command{
@@ -204,6 +225,13 @@ var fetchAvailCapacityCmd = &cobra.Command{
 	Short:  "Fetch capacity report",
 	Long:   `This command will show detailed capacity report of the cluster`,
 	Run:    fetchAvailCapacity,
+}
+
+var fetchTasksWithStatusCmd = &cobra.Command{
+	Use:   "tasksWithStatus",
+	Short: "Fetch tasks with status",
+	Long:  `This command will return the list of tasks with a given status`,
+	Run:   fetchTasksWithStatus,
 }
 
 func fetchTasksConfig(cmd *cobra.Command, args []string) {
@@ -475,4 +503,55 @@ func fetchAvailCapacity(cmd *cobra.Command, args []string) {
 	} else {
 		fmt.Println(capacity)
 	}
+}
+
+//fetchTasksWithStatus returns lists of tasks for a given set of status
+func fetchTasksWithStatus(cmd *cobra.Command, args []string) {
+	status := *taskStatus
+
+	log.Infof("Fetching tasks for environment/role/job:[%s/%s/%s] \n", *env, *role, *name)
+	log.Infof("Fetching tasks for a given status: %v \n", status)
+
+	// This Query takes nil for values it shouldn't need to match against.
+	// This allows us to potentially avoid expensive calls for specific environments, roles, or job names.
+	if *env == "" {
+		env = nil
+	}
+	if *role == "" {
+		role = nil
+	}
+	if *name == "" {
+		name = nil
+	}
+	queryStatuses, err := scheduleStatusFromString(status)
+	if err != nil {
+		log.Fatalf("error: %+v", err)
+	}
+
+	taskQuery := &aurora.TaskQuery{Environment: env, Role: role, JobName: name, Statuses: queryStatuses}
+
+	tasks, err := client.GetTasksWithoutConfigs(taskQuery)
+	if err != nil {
+		log.Fatalf("error: %+v", err)
+	}
+
+	if toJson {
+		tasksMap := map[string][]*aurora.ScheduledTask{strings.ToUpper(status): tasks}
+		fmt.Println(internal.ToJSON(tasksMap))
+	} else {
+		fmt.Printf("Tasks for status %s:\n", strings.ToUpper(status))
+		for _, t := range tasks {
+			fmt.Println(t)
+		}
+	}
+}
+
+// Convert status slice into ScheduleStatus slice
+func scheduleStatusFromString(status string) ([]aurora.ScheduleStatus, error) {
+	scheduleStatus, err := aurora.ScheduleStatusFromString(strings.ToUpper(status))
+	if err != nil {
+		return nil, err
+	}
+	result := []aurora.ScheduleStatus{scheduleStatus}
+	return result, nil
 }
