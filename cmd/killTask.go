@@ -14,6 +14,8 @@
 package cmd
 
 import (
+	"strconv"
+
 	realis "github.com/aurora-scheduler/gorealis/v2"
 	"github.com/spf13/cobra"
 )
@@ -29,10 +31,12 @@ func init() {
 	killTaskCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
 	killTaskCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	killTaskCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
+	killTaskCmd.Flags().StringVarP(instance, "instance", "i", "", "Instance number")
 	killTaskCmd.Flags().BoolVarP(&monitor, "monitor", "m", true, "monitor the result after sending the command")
 	killTaskCmd.MarkFlagRequired("environment")
 	killTaskCmd.MarkFlagRequired("role")
 	killTaskCmd.MarkFlagRequired("name")
+	killTaskCmd.MarkFlagRequired("instance")
 }
 
 var killTask = &cobra.Command{
@@ -43,17 +47,22 @@ var killTask = &cobra.Command{
 var killTaskCmd = &cobra.Command{
 	Use:   "task",
 	Short: "Kill an Aurora Task",
-	Run:   killTask,
+	Run:   killTaskFunc,
 }
 
-func killTask(cmd *cobra.Command, args []string) {
-	log.Infof("Killing task [Env:%s Role:%s Name:%s]\n", *env, *role, *name)
+func killTaskFunc(cmd *cobra.Command, args []string) {
+	log.Infof("Killing task [Env:%s Role:%s Name:%s Instance:%s]\n", *env, *role, *name, *instance)
 
+	//Set jobKey for the task to be killed.
 	task := realis.NewTask().
 		Environment(*env).
 		Role(*role).
 		Name(*name)
-	err := client.KillTask(task.JobKey())
+
+	//Convert instance from string type to int32 type, and call the killtasks function
+	instanceNumber, _ := strconv.Atoi(*instance)
+	_, err := client.KillInstances(task.JobKey(), (int32)(instanceNumber))
+
 	if err != nil {
 		log.Fatalln(err)
 	}
