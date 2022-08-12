@@ -125,8 +125,8 @@ func init() {
 	// fetch tasks with status
 	fetchCmd.AddCommand(fetchTasksWithStatusCmd)
 
-	fetchTasksWithStatusCmd.Flags().StringVarP(taskStatus, "taskStatus", "x", "", "Task Status")
-	fetchTasksWithStatusCmd.MarkFlagRequired("taskStatus")
+	fetchTasksWithStatusCmd.Flags().StringVarP(taskStatus, "status", "x", "", "Task Status")
+	fetchTasksWithStatusCmd.MarkFlagRequired("status")
 	fetchTasksWithStatusCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
 	fetchTasksWithStatusCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	fetchTasksWithStatusCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
@@ -228,7 +228,7 @@ var fetchAvailCapacityCmd = &cobra.Command{
 }
 
 var fetchTasksWithStatusCmd = &cobra.Command{
-	Use:   "tasksWithStatus",
+	Use:   "tasks",
 	Short: "Fetch tasks with status",
 	Long:  `This command will return the list of tasks with a given status`,
 	Run:   fetchTasksWithStatus,
@@ -509,7 +509,7 @@ func fetchAvailCapacity(cmd *cobra.Command, args []string) {
 func fetchTasksWithStatus(cmd *cobra.Command, args []string) {
 	status := *taskStatus
 
-	log.Infof("Fetching tasks for environment/role/job:[%s/%s/%s] \n", *env, *role, *name)
+	log.Infof("Fetching tasks for role/environment/job:[%s/%s/%s] \n", *role, *env, *name)
 	log.Infof("Fetching tasks for a given status: %v \n", status)
 
 	// This Query takes nil for values it shouldn't need to match against.
@@ -523,6 +523,19 @@ func fetchTasksWithStatus(cmd *cobra.Command, args []string) {
 	if *name == "" {
 		name = nil
 	}
+	// role needs to be specified if env is specified
+	if env != nil {
+		if role == nil {
+			log.Fatalln("Role must be specified when env is specified.")
+		}
+	}
+	// role or env needs to be specified if name is specified
+	if name != nil {
+		if role == nil && env == nil {
+			log.Fatalln("Role or env must be specified when name is specified.")
+		}
+	}
+
 	queryStatuses, err := scheduleStatusFromString(status)
 	if err != nil {
 		log.Fatalf("error: %+v", err)
@@ -536,12 +549,19 @@ func fetchTasksWithStatus(cmd *cobra.Command, args []string) {
 	}
 
 	if toJson {
-		tasksMap := map[string][]*aurora.ScheduledTask{strings.ToUpper(status): tasks}
-		fmt.Println(internal.ToJSON(tasksMap))
+		taskStatus := strings.ToUpper(status)
+		// convert task lists to a list of task id like role-env-name-[instance-id]
+		taskIdsMap := map[string][]string{}
+		var taskIds []string
+		for _, task := range tasks {
+			taskIds = append(taskIds, task.AssignedTask.TaskId)
+		}
+		taskIdsMap[taskStatus] = taskIds
+		fmt.Println(internal.ToJSON(taskIdsMap))
 	} else {
 		fmt.Printf("Tasks for status %s:\n", strings.ToUpper(status))
 		for _, t := range tasks {
-			fmt.Println(t)
+			fmt.Println(t.AssignedTask.TaskId)
 		}
 	}
 }
