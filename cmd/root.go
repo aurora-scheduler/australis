@@ -28,7 +28,7 @@ import (
 )
 
 var username, password, zkAddr, schedAddr string
-var env, role, name = new(string), new(string), new(string)
+var env, role, name, instance = new(string), new(string), new(string), new(string)
 var dedicated string
 var ram, disk, gpu, port int64
 var cpu float64
