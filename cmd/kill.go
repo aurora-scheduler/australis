@@ -43,7 +43,7 @@ func init() {
 	killTasksCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
 	killTasksCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	killTasksCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
-	killTasksCmd.Flags().StringVarP(instance, "instance", "i", "", "Instance Number")
+	killTasksCmd.Flags().StringVarP(instances, "instances", "i", "", "Instances")
 	killTasksCmd.Flags().BoolVarP(&monitor, "monitor", "m", true, "monitor the result after sending the command")
 	killTasksCmd.MarkFlagRequired("environment")
 	killTasksCmd.MarkFlagRequired("role")
@@ -62,6 +62,18 @@ var killJobCmd = &cobra.Command{
 	Run:   killJob,
 }
 
+/*
+* The killTasks command allows the user to kill a specific task of a job.
+* The command also allows the user to kill multiple tasks of the same job. To do so the user needs to pass a list of instance numbers as comma separated values.
+* Pass the instance number of the job to be killed after the --instances or -i flag
+* Please note that all the instances passed must belong to the same job.
+*
+* example : australis kill tasks -e "environment" -r "role" -n "job_name" -i "1"
+* The above example kills instance number 1.
+*
+* example 2 : australis kill tasks -e "environment" -r "role" -n "job_name" -i "1, 5, 9"
+* The above example kills tasks 1, 5 and 9, which are part of the same job
+ */
 var killTasksCmd = &cobra.Command{
 	Use:   "tasks",
 	Short: "Kill Aurora Tasks",
@@ -87,7 +99,7 @@ func killJob(cmd *cobra.Command, args []string) {
 }
 
 func killTasks(cmd *cobra.Command, args []string) {
-	log.Infof("Killing task [Env:%s Role:%s Name:%s Instance:%s]\n", *env, *role, *name, *instance)
+	log.Infof("Killing task [Env:%s Role:%s Name:%s Instance:%s]\n", *env, *role, *name, *instances)
 
 	//Set jobKey for the tasks to be killed.
 	task := realis.NewTask().
@@ -96,8 +108,8 @@ func killTasks(cmd *cobra.Command, args []string) {
 		Name(*name)
 
 	//Check that instance number is passed
-	if instance == nil {
-		log.Fatalln("Instance number not found. Please pass a valid instance number. If you want to pass multiple instances, please pass them as space separated integer values")
+	if instances == nil {
+		log.Fatalln("Instance number not found. Please pass a valid instance number. If you want to pass multiple instances, please pass them as comma separated integer values")
 	}
 
 	/*
@@ -107,10 +119,11 @@ func killTasks(cmd *cobra.Command, args []string) {
 	var intErr error
 	var instanceNumber int
 
-	splitString := strings.Split(*instance, " ")
+	splitString := strings.Split(*instances, ",")
 	instanceList := make([]int32, len(splitString))
 
 	for i := range instanceList {
+		splitString[i] = strings.TrimSpace(splitString[i])
 		instanceNumber, intErr = strconv.Atoi(splitString[i])
 		if intErr != nil {
 			log.Fatalln("Instance passed should be a number. Error: " + intErr.Error())
@@ -121,11 +134,10 @@ func killTasks(cmd *cobra.Command, args []string) {
 	}
 
 	//Call the killtasks function, passing the instanceList as the list of instances to be killed.
-	_, err := client.KillInstances(task.JobKey(), instanceList...)
-
-	if err != nil {
+	if _, err := client.KillInstances(task.JobKey(), instanceList...); err != nil {
 		log.Fatalln(err)
 	}
+
 	if monitor {
 		if ok, err := client.MonitorInstances(task.JobKey(), 0, 5, 50); !ok || err != nil {
 			log.Fatalln("Unable to kill the given task")

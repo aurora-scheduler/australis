@@ -51,7 +51,7 @@ var monitor bool
 var timeout time.Duration
 var log = logrus.New()
 var taskStatus = new(string)
-var instance = new(string)
+var instances = new(string)
 
 const australisVer = "v1.0.4"
 
