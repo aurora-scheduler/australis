@@ -93,13 +93,16 @@ func (j *Job) ToRealis() (*realis.AuroraJob, error) {
 		RAM(j.RAM).
 		Disk(j.Disk).
 		AddPorts(int(j.Port)).
-		GPU(j.GPU).
 		IsService(j.Service).
 		Tier(j.Tier).
 		Priority(j.Priority).
 		Production(j.Production).
 		InstanceCount(j.Instances).
 		MaxFailure(j.MaxFailures)
+
+	if j.GPU > 0 {
+		auroraJob.GPU(j.GPU)
+	}
 
 	if j.CronSchedule != nil {
 		auroraJob.CronSchedule(*j.CronSchedule)
