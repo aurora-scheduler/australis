@@ -29,7 +29,7 @@ func init() {
 
 	// Kill Job
 	killCmd.AddCommand(killJobCmd)
-	killCmd.AddCommand(killTaskCmd)
+	killCmd.AddCommand(killTasksCmd)
 
 	killJobCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
 	killJobCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
@@ -40,15 +40,15 @@ func init() {
 	killJobCmd.MarkFlagRequired("name")
 
 	//Set flags for killTask sub-command
-	killTaskCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
-	killTaskCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
-	killTaskCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
-	killTaskCmd.Flags().StringVarP(instance, "instance", "i", "", "Instance Number")
-	killTaskCmd.Flags().BoolVarP(&monitor, "monitor", "m", true, "monitor the result after sending the command")
-	killTaskCmd.MarkFlagRequired("environment")
-	killTaskCmd.MarkFlagRequired("role")
-	killTaskCmd.MarkFlagRequired("name")
-	killTaskCmd.MarkFlagRequired("instance")
+	killTasksCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
+	killTasksCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
+	killTasksCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
+	killTasksCmd.Flags().StringVarP(instance, "instance", "i", "", "Instance Number")
+	killTasksCmd.Flags().BoolVarP(&monitor, "monitor", "m", true, "monitor the result after sending the command")
+	killTasksCmd.MarkFlagRequired("environment")
+	killTasksCmd.MarkFlagRequired("role")
+	killTasksCmd.MarkFlagRequired("name")
+	killTasksCmd.MarkFlagRequired("instance")
 }
 
 var killCmd = &cobra.Command{
@@ -62,7 +62,7 @@ var killJobCmd = &cobra.Command{
 	Run:   killJob,
 }
 
-var killTaskCmd = &cobra.Command{
+var killTasksCmd = &cobra.Command{
 	Use:   "tasks",
 	Short: "Kill Aurora Tasks",
 	Run:   killTasks,
