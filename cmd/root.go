@@ -28,7 +28,7 @@ import (
 )
 
 var username, password, zkAddr, schedAddr string
-var env, role, name, instance = new(string), new(string), new(string), new(string)
+var env, role, name = new(string), new(string), new(string)
 var dedicated string
 var ram, disk, gpu, port int64
 var cpu float64
@@ -51,6 +51,7 @@ var monitor bool
 var timeout time.Duration
 var log = logrus.New()
 var taskStatus = new(string)
+var instance = new(string)
 
 const australisVer = "v1.0.4"
 
