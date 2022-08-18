@@ -63,9 +63,9 @@ var killJobCmd = &cobra.Command{
 }
 
 var killTaskCmd = &cobra.Command{
-	Use:   "task",
-	Short: "Kill an Aurora Task",
-	Run:   killTask,
+	Use:   "tasks",
+	Short: "Kill Aurora Tasks",
+	Run:   killTasks,
 }
 
 func killJob(cmd *cobra.Command, args []string) {
@@ -86,10 +86,10 @@ func killJob(cmd *cobra.Command, args []string) {
 	}
 }
 
-func killTask(cmd *cobra.Command, args []string) {
+func killTasks(cmd *cobra.Command, args []string) {
 	log.Infof("Killing task [Env:%s Role:%s Name:%s Instance:%s]\n", *env, *role, *name, *instance)
 
-	//Set jobKey for the task to be killed.
+	//Set jobKey for the tasks to be killed.
 	task := realis.NewTask().
 		Environment(*env).
 		Role(*role).
