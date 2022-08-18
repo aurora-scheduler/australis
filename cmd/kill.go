@@ -43,7 +43,7 @@ func init() {
 	killTasksCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
 	killTasksCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	killTasksCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
-	killTasksCmd.Flags().StringVarP(instances, "instances", "i", "", "Instances")
+	killTasksCmd.Flags().StringVarP(instances, "instances", "i", "", "Instances e.g. 1, 2, 5")
 	killTasksCmd.Flags().BoolVarP(&monitor, "monitor", "m", true, "monitor the result after sending the command")
 	killTasksCmd.MarkFlagRequired("environment")
 	killTasksCmd.MarkFlagRequired("role")
@@ -116,18 +116,16 @@ func killTasks(cmd *cobra.Command, args []string) {
 	* In the following block, we convert instance numbers, which were passed as strings, to integer values
 	* After converting them to integers, we add them to a slice of type int32.
 	 */
-	var intErr error
-	var instanceNumber int
 
 	splitString := strings.Split(*instances, ",")
 	instanceList := make([]int32, len(splitString))
 
 	for i := range instanceList {
 		splitString[i] = strings.TrimSpace(splitString[i])
-		instanceNumber, intErr = strconv.Atoi(splitString[i])
+		instanceNumber, intErr := strconv.Atoi(splitString[i])
 		if intErr != nil {
 			log.Fatalln("Instance passed should be a number. Error: " + intErr.Error())
-			break
+			return
 		} else {
 			instanceList[i] = int32(instanceNumber)
 		}
