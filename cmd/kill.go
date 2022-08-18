@@ -94,8 +94,18 @@ func killTask(cmd *cobra.Command, args []string) {
 		Role(*role).
 		Name(*name)
 
-	//Convert instance from string type to int32 type, and call the killtasks function
-	instanceNumber, _ := strconv.Atoi(*instance)
+	//Check that instance number is passed
+	if instance == nil {
+		log.Fatalln("instance number not found. Please pass a valid instance number.")
+	}
+
+	//Convert instance from string type to int32 type
+	instanceNumber, intErr := strconv.Atoi(*instance)
+	if intErr != nil {
+		log.Fatalln("Instance passed should be a number. Error: " + intErr.Error())
+	}
+
+	//Call the killtasks function
 	_, err := client.KillInstances(task.JobKey(), (int32)(instanceNumber))
 
 	if err != nil {
