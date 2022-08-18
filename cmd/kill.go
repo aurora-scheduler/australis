@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"strconv"
+	"strings"
 
 	realis "github.com/aurora-scheduler/gorealis/v2"
 	"github.com/spf13/cobra"
@@ -96,17 +97,31 @@ func killTask(cmd *cobra.Command, args []string) {
 
 	//Check that instance number is passed
 	if instance == nil {
-		log.Fatalln("instance number not found. Please pass a valid instance number.")
+		log.Fatalln("Instance number not found. Please pass a valid instance number. If you want to pass multiple instances, please pass them as space separated integer values")
 	}
 
-	//Convert instance from string type to int32 type
-	instanceNumber, intErr := strconv.Atoi(*instance)
-	if intErr != nil {
-		log.Fatalln("Instance passed should be a number. Error: " + intErr.Error())
+	/*
+	* In the following block, we convert instance numbers, which were passed as strings, to integer values
+	* After converting them to integers, we add them to a slice of type int32.
+	 */
+	var intErr error
+	var instanceNumber int
+
+	splitString := strings.Split(*instance, " ")
+	instanceList := make([]int32, len(splitString))
+
+	for i := range instanceList {
+		instanceNumber, intErr = strconv.Atoi(splitString[i])
+		if intErr != nil {
+			log.Fatalln("Instance passed should be a number. Error: " + intErr.Error())
+			break
+		} else {
+			instanceList[i] = int32(instanceNumber)
+		}
 	}
 
-	//Call the killtasks function
-	_, err := client.KillInstances(task.JobKey(), (int32)(instanceNumber))
+	//Call the killtasks function, passing the instanceList as the list of instances to be killed.
+	_, err := client.KillInstances(task.JobKey(), instanceList...)
 
 	if err != nil {
 		log.Fatalln(err)
