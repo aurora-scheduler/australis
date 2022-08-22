@@ -98,7 +98,7 @@ func init() {
 	})
 
 	/* Fetch Master nodes/Leader */
-	masterCmd.Flags().String("zkPath", "/aurora/scheduler", "Zookeeper node path to get master nodes/leaders")
+	masterCmd.Flags().String("zkPath", "/aurora/scheduler", "Zookeeper node path to get master nodes/leader")
 
 	fetchCmd.AddCommand(masterCmd)
 
@@ -114,7 +114,7 @@ func init() {
 		help(cmd, s)
 	})
 
-	mesosMasterCmd.Flags().String("zkPath", "/mesos", "Zookeeper node path to get mesos master nodes/leaders")
+	mesosMasterCmd.Flags().String("zkPath", "/mesos", "Zookeeper node path to get mesos master nodes/leader")
 	mesosCmd.AddCommand(mesosMasterCmd)
 
 	// Hijack help function to hide unnecessary global flags
@@ -428,8 +428,10 @@ func fetchMaster(cmd *cobra.Command, args []string) {
 	if toJson {
 		fmt.Println(internal.ToJSON(masterMap))
 	} else {
-		for key, mesosMasterNodes := range masterMap {
-			fmt.Println(key + "=" + mesosMasterNodes)
+		for key, masterNodes := range masterMap {
+			for _, masterNode := range masterNodes {
+				fmt.Println(key + "=" + masterNode)
+			}
 		}
 	}
 }
@@ -440,9 +442,6 @@ func fetchMesosMaster(cmd *cobra.Command, args []string) {
 		if err != nil || mesosAgentFlags.Master == "" {
 			log.Debugf("unable to fetch Mesos master nodes via local Mesos agent: %v", err)
 			args = append(args, "localhost")
-		} else if mesosAgentFlags.hasMaster {
-			fmt.Println(mesosAgentFlags.Master)
-			return
 		} else {
 			args = append(args, strings.Split(mesosAgentFlags.Master, ",")...)
 		}
@@ -458,7 +457,9 @@ func fetchMesosMaster(cmd *cobra.Command, args []string) {
 		fmt.Println(internal.ToJSON(mesosMasterMap))
 	} else {
 		for key, mesosMasterNodes := range mesosMasterMap {
-			fmt.Println(key + "=" + mesosMasterNodes)
+			for _, mesosMasterNode := range mesosMasterNodes {
+				fmt.Println(key + "=" + mesosMasterNode)
+			}
 		}
 	}
 }
