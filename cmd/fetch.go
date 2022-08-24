@@ -97,6 +97,38 @@ func init() {
 		help(cmd, s)
 	})
 
+	/* Fetch Master nodes/Leader */
+	masterCmd.Flags().String("zkPath", "/aurora/scheduler", "Zookeeper node path to get master nodes/leader")
+
+	fetchCmd.AddCommand(masterCmd)
+
+	// Hijack help function to hide unnecessary global flags
+	masterCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+		if cmd.HasInheritedFlags() {
+			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag) {
+				if f.Name != "logLevel" {
+					f.Hidden = true
+				}
+			})
+		}
+		help(cmd, s)
+	})
+
+	mesosMasterCmd.Flags().String("zkPath", "/mesos", "Zookeeper node path to get mesos master nodes/leader")
+	mesosCmd.AddCommand(mesosMasterCmd)
+
+	// Hijack help function to hide unnecessary global flags
+	mesosMasterCmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
+		if cmd.HasInheritedFlags() {
+			cmd.InheritedFlags().VisitAll(func(f *pflag.Flag) {
+				if f.Name != "logLevel" {
+					f.Hidden = true
+				}
+			})
+		}
+		help(cmd, s)
+	})
+
 	// Fetch jobs
 	fetchJobsCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	fetchCmd.AddCommand(fetchJobsCmd)
@@ -180,6 +212,18 @@ Pass Zookeeper nodes separated by a space as an argument to this command.`,
 	Run: fetchLeader,
 }
 
+var masterCmd = &cobra.Command{
+	Use:               "master [zkNode0 zkNode1  ...zkNodeN]",
+	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
+	PreRun:            setConfig,
+	Args:              cobra.MinimumNArgs(1),
+	Short:             "Fetch current Aurora master nodes/leader given Zookeeper nodes. ",
+	Long: `Gets the current aurora master nodes/leader using information from Zookeeper path.
+Pass Zookeeper nodes separated by a space as an argument to this command.`,
+	Run: fetchMaster,
+}
+
 var mesosCmd = &cobra.Command{
 	Use:    "mesos",
 	PreRun: setConfig,
@@ -196,6 +240,18 @@ var mesosLeaderCmd = &cobra.Command{
 Pass Zookeeper nodes separated by a space as an argument to this command. If no nodes are provided, 
 it fetches leader from local Mesos agent or Zookeeper`,
 	Run: fetchMesosLeader,
+}
+
+var mesosMasterCmd = &cobra.Command{
+	Use:               "master [zkNode0 zkNode1 ...zkNodeN]",
+	PersistentPreRun:  func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {}, // We don't need a realis client for this cmd
+	PreRun:            setConfig,
+	Short:             "Fetch current Mesos-master nodes/leader given Zookeeper nodes.",
+	Long: `Gets the current Mesos-master instances using information from Zookeeper path.
+Pass Zookeeper nodes separated by a space as an argument to this command. If no nodes are provided, 
+it fetches Mesos-master nodes/leader from local Mesos agent or Zookeeper`,
+	Run: fetchMesosMaster,
 }
 
 var fetchJobsCmd = &cobra.Command{
@@ -354,6 +410,58 @@ func fetchMesosLeader(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println(url)
+}
+
+func fetchMaster(cmd *cobra.Command, args []string) {
+	log.Infof("Fetching master nodes from %v \n", args)
+
+	if len(args) < 1 {
+		log.Fatalln("At least one Zookeeper node address must be passed in.")
+	}
+
+	masterMap, err := realis.MasterNodesFromZKOpts(realis.ZKEndpoints(args...), realis.ZKPath(cmd.Flag("zkPath").Value.String()))
+
+	if err != nil {
+		log.Fatalf("error: %+v\n", err)
+	}
+
+	if toJson {
+		fmt.Println(internal.ToJSON(masterMap))
+	} else {
+		for key, masterNodes := range masterMap {
+			for _, masterNode := range masterNodes {
+				fmt.Println(key + "=" + masterNode)
+			}
+		}
+	}
+}
+
+func fetchMesosMaster(cmd *cobra.Command, args []string) {
+	if len(args) < 1 {
+		mesosAgentFlags, err := fetchMasterFromAgent(localAgentStateURL)
+		if err != nil || mesosAgentFlags.Master == "" {
+			log.Debugf("unable to fetch Mesos master nodes via local Mesos agent: %v", err)
+			args = append(args, "localhost")
+		} else {
+			args = append(args, strings.Split(mesosAgentFlags.Master, ",")...)
+		}
+	}
+	log.Infof("Fetching Mesos-master nodes from Zookeeper node(s): %v \n", args)
+
+	mesosMasterMap, err := realis.MesosMasterNodesFromZKOpts(realis.ZKEndpoints(args...), realis.ZKPath(cmd.Flag("zkPath").Value.String()))
+
+	if err != nil {
+		log.Fatalf("error: %+v\n", err)
+	}
+	if toJson {
+		fmt.Println(internal.ToJSON(mesosMasterMap))
+	} else {
+		for key, mesosMasterNodes := range mesosMasterMap {
+			for _, mesosMasterNode := range mesosMasterNodes {
+				fmt.Println(key + "=" + mesosMasterNode)
+			}
+		}
+	}
 }
 
 func fetchMasterFromAgent(url string) (mesosAgentFlags mesosAgentFlags, err error) {
