@@ -3,9 +3,7 @@ module github.com/aurora-scheduler/australis
 go 1.15
 
 require (
-	github.com/andygrunwald/megos v0.0.0-20210622170559-e9ff1cac83c5
-	github.com/aurora-scheduler/gorealis/v2 v2.28.0
-	github.com/gizak/termui/v3 v3.1.0
+	github.com/aurora-scheduler/gorealis/v2 v2.29.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
