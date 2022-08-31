@@ -43,7 +43,7 @@ func init() {
 	killTasksCmd.Flags().StringVarP(env, "environment", "e", "", "Aurora Environment")
 	killTasksCmd.Flags().StringVarP(role, "role", "r", "", "Aurora Role")
 	killTasksCmd.Flags().StringVarP(name, "name", "n", "", "Aurora Name")
-	killTasksCmd.Flags().StringVarP(instances, "instances", "i", "", "Instances e.g. 1, 2, 5")
+	killTasksCmd.Flags().StringVarP(instances, "instances", "I", "", "Instances e.g. 1, 2, 5")
 	killTasksCmd.Flags().BoolVarP(&monitor, "monitor", "m", true, "monitor the result after sending the command")
 	killTasksCmd.MarkFlagRequired("environment")
 	killTasksCmd.MarkFlagRequired("role")
@@ -65,13 +65,13 @@ var killJobCmd = &cobra.Command{
 /*
 * The killTasks command allows the user to kill a specific task of a job.
 * The command also allows the user to kill multiple tasks of the same job. To do so the user needs to pass a list of instance numbers as comma separated values.
-* Pass the instance number of the job to be killed after the --instances or -i flag
+* Pass the instance number of the job to be killed after the --instances or -I flag
 * Please note that all the instances passed must belong to the same job.
 *
-* example : australis kill tasks -e "environment" -r "role" -n "job_name" -i "1"
+* example : australis kill tasks -e "environment" -r "role" -n "job_name" -I "1"
 * The above example kills instance number 1.
 *
-* example 2 : australis kill tasks -e "environment" -r "role" -n "job_name" -i "1, 5, 9"
+* example 2 : australis kill tasks -e "environment" -r "role" -n "job_name" -I "1, 5, 9"
 * The above example kills tasks 1, 5 and 9, which are part of the same job
  */
 var killTasksCmd = &cobra.Command{
