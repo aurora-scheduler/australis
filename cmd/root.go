@@ -53,7 +53,7 @@ var log = logrus.New()
 var taskStatus = new(string)
 var instances = new(string)
 
-const australisVer = "v1.0.4"
+const australisVer = "v1.0.5"
 
 var forceDrainTimeout time.Duration
 

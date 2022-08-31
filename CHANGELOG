@@ -1,4 +1,9 @@
-1.0.5 (unreleased)
+1.0.6 (unreleased)
+
+1.0.5 
+
+* fetch mesos & aurora master nodes
+* kill an instance from a job
 
 1.0.4
 
