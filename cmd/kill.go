@@ -48,7 +48,7 @@ func init() {
 	killTasksCmd.MarkFlagRequired("environment")
 	killTasksCmd.MarkFlagRequired("role")
 	killTasksCmd.MarkFlagRequired("name")
-	killTasksCmd.MarkFlagRequired("instance")
+	killTasksCmd.MarkFlagRequired("instances")
 }
 
 var killCmd = &cobra.Command{
@@ -106,11 +106,6 @@ func killTasks(cmd *cobra.Command, args []string) {
 		Environment(*env).
 		Role(*role).
 		Name(*name)
-
-	//Check that instance number is passed
-	if instances == nil {
-		log.Fatalln("Instance number not found. Please pass a valid instance number. If you want to pass multiple instances, please pass them as comma separated integer values")
-	}
 
 	/*
 	* In the following block, we convert instance numbers, which were passed as strings, to integer values
